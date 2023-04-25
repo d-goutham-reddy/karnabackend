@@ -1,16 +1,18 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-// const DonorRoute=require("./routes/DonorRoute")
-// const HospitalRoute=require("./routes/HospitalRoute")
-// const AdminRoute=require("./routes/AdminRoute")
+const HomeRoutes=require("./routes/HomeRoutes");
+const AdminRoutes=require("./routes/AdminRoutes")
+const DonorRoutes=require("./routes/DonorRoutes")
+const HospitalRoutes=require("./routes/HospitalRoutes")
+const BloodBankRoutes=require("./routes/BloodBankRoutes")
 // const authRoute=require('./routes/authRoute')
 const cors = require('cors');
 const app=express();
 app.use(express.json())
 dotenv.config();
 
-app.use(cors({ origin: 'http://localhost:3000',method: ['GET','POST','PUT','DELETE'] }));
+app.use(cors({ origin: 'http://localhost:5000',method: ['GET','POST','PUT','DELETE'] }));
 
 mongoose
   .connect(process.env.MONGO_URL, { useNewUrlParser: true })
@@ -19,8 +21,10 @@ mongoose
     console.log(err);
   });
 
-//   app.use("/donor",DonorRoute)
-//   app.use("/hospital",HospitalRoute)
-//   app.use("/admin",AdminRoute)
+  app.use("/home",HomeRoutes)
+  app.use("/admin",AdminRoutes)
+  app.use("/donor",DonorRoutes)
+  app.use("/hospital",HospitalRoutes)
+  app.use("/bloodbank",BloodBankRoutes)
 //   app.use("/auth",authRoute)
   app.listen(process.env.PORT,(req,res)=>{console.log("app is working")})

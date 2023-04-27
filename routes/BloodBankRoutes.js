@@ -27,6 +27,32 @@ router.post("/signup", async (req, res) => {
 });
 
 //-------------------------------------------------------------------------------------------------------
+//                                         Updation Of Details
+
+router.put("/updatedetails/:bloodbankid",async(req,res)=>{
+  try {
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      req.body.password = await bcrypt.hash(req.body.password, salt);
+    }
+    BloodBank.findByIdAndUpdate(req.params.bloodbankid,
+      {
+        $set: req.body,
+      },
+      { new: true },
+      function(err,bloodbank){
+      if(err){
+        res.status(500).json(err);
+      }
+      res.status(200).json(bloodbank);
+    });
+  }
+  catch (err) {
+    res.status(500).json(err);
+}
+})
+
+//-------------------------------------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------------------------------------
 module.exports = router;

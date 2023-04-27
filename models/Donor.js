@@ -1,6 +1,4 @@
 const mongoose =require('mongoose')
-// const Schema=require('mongoose').Schema
-// const Hospital = require("./Hospital");
 
 const DonorSchema =mongoose.Schema({
   fname: {
@@ -89,38 +87,45 @@ const DonorSchema =mongoose.Schema({
 
   dead:{
     type:Boolean,
-    default:false
+    default:false,
+    required:true
   },
 
   permanentbanreason:{
     type:String,
-    default:"false"
+    default:"false",
+    required:true
   },
 
   eligibledate:{
     type:Date,
-    default: new Date()
+    default:new Date(),
+    required:true
   },
 
   livessavedmeter:{
     type:Number,
-    default:0
+    default:0,
+    required:true
   },
 
   points:{
     type:Number,
-    default:0
+    default:0,
+    required:true
   },
 
   badge:{
     type:String,
     default:"Rookie",
-    enum:["Rookie","Enthusiast","Elite","Pro","Guru","Specialist","Champion"]
+    enum:["Rookie","Enthusiast","Elite","Pro","Guru","Specialist","Champion"],
+    required:true
   },
 
   volunteer:{
     type:Boolean,
-    default:false
+    default:false,
+    required:true
   },
 
   feedback:{
@@ -155,8 +160,7 @@ const DonorSchema =mongoose.Schema({
 //   medicaldetails:{
 //     type:String
 //   },
-  
-//   transplantHospitalDetails: { type: Schema.Types.ObjectId, ref: Hospital }
+
 },
 { timestamps: true });
 

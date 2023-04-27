@@ -15,6 +15,7 @@ dotenv.config();
 app.use(cors({ origin: 'http://localhost:5000',method: ['GET','POST','PUT','DELETE'] }));
 
 mongoose
+  .set('strictQuery', true)
   .connect(process.env.MONGO_URL, { useNewUrlParser: true })
   .then(console.log("Connected to mongoDB"))
   .catch((err) => {

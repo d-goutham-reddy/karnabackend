@@ -37,7 +37,23 @@ const BloodBankSchema = mongoose.Schema({
     required: true,
     default:"Blood Bank",
     enum:["Blood Bank"]
-  }
+  },
+
+  livessavedmeter:{
+    type:Number,
+    default:0
+  },
+
+  points:{
+    type:Number,
+    default:0
+  },
+
+  badge:{
+    type:String,
+    default:"Rookie",
+    enum:["Rookie","Enthusiast","Elite","Pro","Guru","Specialist","Champion"]
+  },
 
 //   verificationstatus:{
 //     type:String,

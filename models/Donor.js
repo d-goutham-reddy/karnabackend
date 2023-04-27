@@ -83,6 +83,50 @@ const DonorSchema =mongoose.Schema({
     enum:["Donor"]
   },
 
+  lastdonationdate:{
+    type:Date
+  },
+
+  dead:{
+    type:Boolean,
+    default:false
+  },
+
+  permanentbanreason:{
+    type:String,
+    default:"false"
+  },
+
+  eligibledate:{
+    type:Date,
+    default: new Date()
+  },
+
+  livessavedmeter:{
+    type:Number,
+    default:0
+  },
+
+  points:{
+    type:Number,
+    default:0
+  },
+
+  badge:{
+    type:String,
+    default:"Rookie",
+    enum:["Rookie","Enthusiast","Elite","Pro","Guru","Specialist","Champion"]
+  },
+
+  volunteer:{
+    type:Boolean,
+    default:false
+  },
+
+  feedback:{
+    type:String
+  }
+
 //   userid: {
 //     type: Number,
 //     required: true

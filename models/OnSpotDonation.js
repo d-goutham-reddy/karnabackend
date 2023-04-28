@@ -14,6 +14,11 @@ const OnspotDonationSchema = mongoose.Schema({
         required: true
     },
 
+    appdate:{
+        type:Date,
+        required:true
+    },
+
     time: {
         type: String,
         required: true
@@ -24,18 +29,6 @@ const OnspotDonationSchema = mongoose.Schema({
         default:"Upcoming",
         enum:["Upcoming","Completed","Cancelled"],
         required: true
-    },
-
-    cancelReason:{
-        type:String
-    },
-
-    report:{
-        type:String
-    },
-
-    feedback:{
-        type:String
     },
 
     fname: {
@@ -55,8 +48,7 @@ const OnspotDonationSchema = mongoose.Schema({
     
     email: {
         type: String,
-        required: true,
-        unique : true
+        required: true
     },
     
     address: {
@@ -83,6 +75,18 @@ const OnspotDonationSchema = mongoose.Schema({
     age: {
         type: Number,
         required: true
+    },
+
+    cancelReason:{
+        type:String
+    },
+
+    report:{
+        type:String
+    },
+
+    feedback:{
+        type:String
     },
 
     bloodbankDetails: { type: Schema.Types.ObjectId, ref: BloodBank }

@@ -15,6 +15,11 @@ const BloodDonationSchema = mongoose.Schema({
         required: true
     },
 
+    appdate:{
+        type:Date,
+        required:true
+    },
+
     time: {
         type: String,
         required: true

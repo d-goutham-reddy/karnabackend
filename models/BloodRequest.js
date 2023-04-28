@@ -19,6 +19,7 @@ const BloodRequestSchema = mongoose.Schema({
 
     component:{
         type:String,
+        enum:["whole","rbc","platelet","plasma"],
         required:true
     },
 
@@ -44,8 +45,7 @@ const BloodRequestSchema = mongoose.Schema({
     
     email: {
         type: String,
-        required: true,
-        unique : true
+        required: true
     },
     
     address: {

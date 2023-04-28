@@ -36,6 +36,34 @@ router.post("/signup", async (req, res) => {
 });
 
 //-------------------------------------------------------------------------------------------------------
+//                                         Updation Of Details 
+//                                                  &
+//                                           Feedback Submit
+
+router.put("/updatedetails/:donorid",async(req,res)=>{
+  try {
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      req.body.password = await bcrypt.hash(req.body.password, salt);
+    }
+    Donor.findByIdAndUpdate(req.params.donorid,
+      {
+        $set: req.body,
+      },
+      { new: true },
+      function(err,donor){
+      if(err){
+        res.status(500).json(err);
+      }
+      res.status(200).json(donor);
+    });
+  }
+  catch (err) {
+    res.status(500).json(err);
+}
+})
+
+//-------------------------------------------------------------------------------------------------------
 //                                             New Blood Donation
 
 router.post("/newblooddonation/:donorid/:bloodbankid", async (req, res) => {
@@ -48,6 +76,7 @@ router.post("/newblooddonation/:donorid/:bloodbankid", async (req, res) => {
           if(donor.eligibledate<new Date()){
             const newblooddonation = new BloodDonation({
               location:bloodbank.name,
+              appdate:req.body.appdate,
               time:req.body.time,
               bloodgroup:donor.bloodgroup,
               donorDetails: req.params.donorid,
@@ -82,7 +111,10 @@ router.post("/newblooddonation/:donorid/:bloodbankid", async (req, res) => {
   }
 });
 
-//                                         Your Appointments -> Upcoming
+//-------------------------------------------------------------------------------------------------------
+//                                         Your Appointments
+
+// Upcoming Appointments
 router.get("/upcomingappointments/:donorid",async(req,res)=>{
   try{
     BloodDonation.find({donorDetails:req.params.donorid,status:"Upcoming"},function(err,bd){
@@ -90,7 +122,7 @@ router.get("/upcomingappointments/:donorid",async(req,res)=>{
         res.status(500).json(err);
       }
       res.status(200).json(bd);
-    })
+    }).sort({appdate:"asc"})
     // .populate('donorDetails').populate('bloodbankDetails')
   }
   catch(err){
@@ -98,32 +130,40 @@ router.get("/upcomingappointments/:donorid",async(req,res)=>{
   }
 })
 
-//-------------------------------------------------------------------------------------------------------
-//                                         Updation Of Details 
-//                                                  &
-//                                           Feedback Submit
-
-router.put("/updatedetails/:donorid",async(req,res)=>{
-  try {
-    if (req.body.password) {
-      const salt = await bcrypt.genSalt(10);
-      req.body.password = await bcrypt.hash(req.body.password, salt);
-    }
-    Donor.findByIdAndUpdate(req.params.donorid,
-      {
-        $set: req.body,
-      },
-      { new: true },
-      function(err,donor){
+// Cancel Upcoming Appointment
+router.put("/upcomingappointments/cancel/:blooddonationid",async(req,res)=>{
+  try{
+    BloodDonation.findByIdAndUpdate(req.params.blooddonationid,{
+      cancelReason:req.body.cancelReason,
+      status:"Cancelled"
+    },
+    { new:true },
+    function(err,bd){
       if(err){
         res.status(500).json(err);
       }
-      res.status(200).json(donor);
-    });
+      res.status(200).json(bd);
+    }).populate('donorDetails').populate('bloodbankDetails')
   }
-  catch (err) {
+  catch(err){
     res.status(500).json(err);
-}
+  }
+})
+
+// Cancelled Appointments
+router.get("/cancelledappointments/:donorid",async(req,res)=>{
+  try{
+    BloodDonation.find({'donorDetails':req.params.donorid, status:"Cancelled"},function(err,bd){
+      if(err){
+        res.status(500).json(err);
+      }
+      res.status(200).json(bd);
+    }).sort({updatedAt:"desc"})
+    // .populate('donorDetails').populate('bloodbankDetails');
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
 })
 
 //-------------------------------------------------------------------------------------------------------

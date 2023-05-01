@@ -1,6 +1,13 @@
 const mongoose = require("mongoose");
 
 const HospitalSchema = mongoose.Schema({
+  verificationStatus:{
+    type:String,
+    required:true,
+    default:"Pending",
+    enum:["Pending","Verified"]
+  },
+  
   name: {
     type: String,
     required: true

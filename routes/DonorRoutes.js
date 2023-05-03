@@ -91,7 +91,7 @@ router.post("/newblooddonation/:donorid/:bloodbankid", async (req, res) => {
             }).populate('donorDetails').populate('bloodbankDetails')
           }
           else{
-            res.status(402).json("Donor Not Eligible To Donate As It Is Yet To Pass The Eligible Date");
+            res.status(402).json("Donor Not Eligible To Donate As He Is Yet To Pass The Eligible Date");
           }
         }
         else{
@@ -141,6 +141,36 @@ router.put("/upcomingappointments/cancel/:blooddonationid",async(req,res)=>{
     function(err,bd){
       if(err){
         res.status(500).json(err);
+      }
+      res.status(200).json(bd);
+    }).populate('donorDetails').populate('bloodbankDetails')
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+// Completed Appointments
+router.get("/completedappointments/:donorid",async(req,res)=>{
+  try{
+    BloodDonation.find({status:"Completed",donorDetails:req.params.donorid},function(err,bd){
+      if(err){
+        res.status(501).json(err);
+      }
+      res.status(200).json(bd);
+    }).populate('donorDetails').populate('bloodbankDetails').sort({updatedAt:"descending"})
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+// Completed Appointments -> Feedback
+router.put("/completedappointments/feedback/:blooddonationid",async(req,res)=>{
+  try{
+    BloodDonation.findByIdAndUpdate(req.params.blooddonationid,{feedback:req.body.feedback},{new:true},function(err,bd){
+      if(err){
+        res.status(501).json(err);
       }
       res.status(200).json(bd);
     }).populate('donorDetails').populate('bloodbankDetails')

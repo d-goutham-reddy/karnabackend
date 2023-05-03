@@ -21,7 +21,7 @@ const BloodPacketSchema = mongoose.Schema({
         default:true
     },
 
-    BloodDonation:{ type: Schema.Types.ObjectId, ref: BloodDonation }
+    bloodDonationDetails:{ type: Schema.Types.ObjectId, ref: BloodDonation }
 
 },
 { timestamps: true });

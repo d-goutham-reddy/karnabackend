@@ -38,6 +38,18 @@ const BloodDonationSchema = mongoose.Schema({
         required:true
     },
 
+    plateletCount:{
+        type:String
+    },
+
+    haemoglobinLevel:{
+        type:String
+    },
+
+    rbcCount:{
+        type:String
+    },
+
     cancelReason:{
         type:String
     },

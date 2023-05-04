@@ -197,6 +197,24 @@ router.get("/cancelledappointments/:donorid",async(req,res)=>{
 })
 
 //-------------------------------------------------------------------------------------------------------
+//                                      My Impact Page
+
+// Words From Lives You Saved
+router.get("/words/:donorid",async(req,res)=>{
+  try{
+    BloodDonation.find({status:"Completed",heartwarmingmsg:{"$exists":true},donorDetails:req.params.donorid},'heartwarmingmsg',function(err,bd){
+      if(err){
+        res.status(501).json(err);
+      }
+      res.status(200).json(bd);
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+//-------------------------------------------------------------------------------------------------------
 //                                  Just For Practice (Not Used In Front-End)
 
 // Donor Details

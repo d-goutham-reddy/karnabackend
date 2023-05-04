@@ -60,10 +60,25 @@ router.put("/updatedetails/:bloodbankid",async(req,res)=>{
 //-------------------------------------------------------------------------------------------------------
 //                                            My Impact
 
+// Words From Lives You Saved
+router.get("/words/:bloodbankid",async(req,res)=>{
+  try{
+    BloodDonation.find({status:"Completed",heartwarmingmsg:{"$exists":true},bloodbankDetails:req.params.bloodbankid},'heartwarmingmsg',function(err,bd){
+      if(err){
+        res.status(501).json(err);
+      }
+      res.status(200).json(bd);
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
 // Feedbacks About Your Service
 router.get("/feedbacks/:bloodbankid",async(req,res)=>{
   try{
-    BloodDonation.find({status:"Completed",feedback:{"$exists":true}},'feedback',function(err,bd){
+    BloodDonation.find({status:"Completed",feedback:{"$exists":true},bloodbankDetails:req.params.bloodbankid},'feedback',function(err,bd){
       if(err){
         res.status(501).json(err);
       }
@@ -77,42 +92,6 @@ router.get("/feedbacks/:bloodbankid",async(req,res)=>{
 
 //-------------------------------------------------------------------------------------------------------
 //                                         Appointments Management
-
-//                                        Create An On-Spot Donation
-router.post("/onspotdonation/:bloodbankid",async(req,res)=>{
-  try {
-    const bb=await BloodBank.findById(req.params.bloodbankid);
-    const newonspotdonation = new OnSpotDonation({
-      bloodgroup:req.body.bloodgroup,
-      location:bb.name,
-      appdate:req.body.appdate,
-      time:req.body.time,
-      fname:req.body.fname,
-      mname:req.body.mname,
-      lname:req.body.lname,
-      email: req.body.email,
-      address:req.body.address,
-      phone:req.body.phone,
-      sex:req.body.sex,
-      DOB:req.body.DOB,
-      age:req.body.age,
-      bloodbankDetails:req.params.bloodbankid
-    });
-    const nosd = await newonspotdonation.save();
-    OnSpotDonation.findById(nosd._id,function(err,osd){
-      if(err){
-        res.status(500).json(err);
-      }
-      res.status(200).json(osd);
-    }).populate('bloodbankDetails');
-  }
-  catch(err){
-    res.status(500).json(err);
-  }
-})
-
-//-------------------------------------------------------------------------------------------------------
-//                                      Blood Bank Appointments
 
 // Upcoming Appointments
 router.get("/appointments/upcoming/:bloodbankid",async(req,res)=>{
@@ -548,10 +527,10 @@ router.put("/stock/new/create/:blooddonationid",async(req,res)=>{
   }
 })
 
-// Packets -> Whole or RBC or Platelet or Plasma
-router.get("/stock/:bloodbankid",async(req,res)=>{
+// Available Packets -> Whole or RBC or Platelet or Plasma
+router.get("/stock/available/:bloodbankid",async(req,res)=>{
   try{
-    BloodPacket.find({separationType:req.body.packettype}).populate('bloodDonationDetails').exec((err,bp)=>{
+    BloodPacket.find({separationType:req.body.packettype,availablestatus:true}).populate('bloodDonationDetails').exec((err,bp)=>{
       if(err){
         res.status(501).json(err);
       }
@@ -568,6 +547,7 @@ router.get("/stock/:bloodbankid",async(req,res)=>{
     res.status(500).json(err);
   }
 })
+
 //-------------------------------------------------------------------------------------------------------
 //                                   Hospital Requests Management
 
@@ -586,8 +566,182 @@ router.get("/requests/waiting",async(req,res)=>{
   }
 })
 
+// Waiting Requests -> Provide -> Put RFID Tag Near Reader
+router.put("/requests/waiting/provide/:requestid/:bloodpacketid",async(req,res)=>{
+  try{
+    BloodPacket.findById(req.params.bloodpacketid,function(err,bp){
+      if(err){
+        res.status(501).json(err);
+      }
+      BloodRequest.findById(req.params.requestid,function(err,br){
+        if(err){
+          res.status(502).json(err);
+        }
+        if(br.status=="Waiting"){
+          if(bp.availablestatus){
+            if(bp.separationType==br.component){
+              if(bp.bloodDonationDetails.bloodgroup==br.bloodgroup){
+                if(new Date()<bp.expiryDate){
+                  BloodRequest.findByIdAndUpdate(req.params.requestid,{status:"Confirmed"},{new:true},function(err,newbr){
+                    if(err){
+                      res.status(503).json(err);
+                    }
+                    BloodPacket.findByIdAndUpdate(req.params.bloodpacketid,{bloodRequestDetails:req.params.requestid,availablestatus:false},{new:true},function(err,newbp){
+                      if(err){
+                        res.status(504).json(err);
+                      }
+                      res.status(200).json(newbp);
+                    }).populate({
+                      path : 'bloodDonationDetails',
+                      populate: [{
+                        path: 'donorDetails'
+                      },{
+                        path: 'bloodbankDetails'
+                      }]
+                    }).populate({
+                      path : 'bloodRequestDetails',
+                      populate: {
+                        path: 'hospitalDetails'
+                      }
+                    })
+                  })
+                }
+                else{
+                  res.status(400).json("The Blood Packet Scanned Has Expired And Hence Cannot Be Sent To The Hospital. Please Dispose It")
+                }
+              }
+              else{
+                res.status(400).json("The Blood Type Requested Does Not Match The Blood Type Present In The Blood Packet");
+              }
+            }
+            else{
+              res.status(400).json("The Component Type Requested Does Not Match The Component Type Present In The Blood Packet");
+            }
+          }
+          else{
+            res.status(400).json("The Requested Blood Packet Is Not Available As It Already Is Booked");
+          }
+        }
+        else{
+          res.status(400).json("The Hospital Request Does Not Have Its Status As Waiting. Please Check.")
+        }
+      })
+    }).populate({
+      path : 'bloodDonationDetails',
+      populate: [{
+        path: 'donorDetails'
+      },{
+        path: 'bloodbankDetails'
+      }]
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+// Confirmed Requests
+router.get("/requests/confirmed/:bloodbankid",async(req,res)=>{
+  try{
+    BloodPacket.find({availablestatus:false},function(err,bp){
+      if(err){
+        res.status(501).json(err);
+      }
+      var lbp=[]
+      for(let b of bp){
+        if(b.bloodRequestDetails.status=="Confirmed"&&b.bloodDonationDetails.bloodbankDetails._id==req.params.bloodbankid){
+          lbp.push(b);
+        }
+      }
+      res.status(200).json(lbp);
+    }).populate({
+      path : 'bloodDonationDetails',
+      populate: [{
+        path: 'donorDetails'
+      },{
+        path: 'bloodbankDetails'
+      }]
+    }).populate({
+      path : 'bloodRequestDetails',
+      populate: {
+        path: 'hospitalDetails'
+      }
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+// Delivered Requests
+router.get("/requests/delivered/:bloodbankid",async(req,res)=>{
+  try{
+    BloodPacket.find({availablestatus:false},function(err,bp){
+      if(err){
+        res.status(501).json(err);
+      }
+      var lbp=[];
+      for(let b of bp){
+        if(b.bloodRequestDetails.status=="Delivered"&&b.bloodDonationDetails.bloodbankDetails._id==req.params.bloodbankid){
+          lbp.push(b);
+        }
+      }
+      res.status(200).json(lbp);
+    }).populate({
+      path : 'bloodDonationDetails',
+      populate: [{
+        path: 'donorDetails'
+      },{
+        path: 'bloodbankDetails'
+      }]
+    }).populate({
+      path : 'bloodRequestDetails',
+      populate: {
+        path: 'hospitalDetails'
+      }
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
 //-------------------------------------------------------------------------------------------------------
 //                                      Blood Bank Appointments
+
+//                                        Create An On-Spot Donation
+// router.post("/onspotdonation/:bloodbankid",async(req,res)=>{
+//   try {
+//     const bb=await BloodBank.findById(req.params.bloodbankid);
+//     const newonspotdonation = new OnSpotDonation({
+//       bloodgroup:req.body.bloodgroup,
+//       location:bb.name,
+//       appdate:req.body.appdate,
+//       time:req.body.time,
+//       fname:req.body.fname,
+//       mname:req.body.mname,
+//       lname:req.body.lname,
+//       email: req.body.email,
+//       address:req.body.address,
+//       phone:req.body.phone,
+//       sex:req.body.sex,
+//       DOB:req.body.DOB,
+//       age:req.body.age,
+//       bloodbankDetails:req.params.bloodbankid
+//     });
+//     const nosd = await newonspotdonation.save();
+//     OnSpotDonation.findById(nosd._id,function(err,osd){
+//       if(err){
+//         res.status(500).json(err);
+//       }
+//       res.status(200).json(osd);
+//     }).populate('bloodbankDetails');
+//   }
+//   catch(err){
+//     res.status(500).json(err);
+//   }
+// })
+
 //                                       On Spot Appointments
 
 // Upcoming

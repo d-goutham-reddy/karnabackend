@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema=require('mongoose').Schema
 const Hospital = require("./Hospital");
-const BloodPacket = require("./BloodPacket");
+// const BloodPacket = require("./BloodPacket");
 
 const BloodRequestSchema = mongoose.Schema({
     bloodgroup: {
@@ -78,9 +78,9 @@ const BloodRequestSchema = mongoose.Schema({
         type:String
     },
 
-    hospitalDetails: { type: Schema.Types.ObjectId, ref: Hospital },
+    hospitalDetails: { type: Schema.Types.ObjectId, ref: Hospital }
 
-    bloodPacketDetails: { type: Schema.Types.ObjectId, ref: BloodPacket }
+    // bloodPacketDetails: { type: Schema.Types.ObjectId, ref: BloodPacket }
 
 },
 { timestamps: true });

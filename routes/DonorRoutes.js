@@ -36,6 +36,30 @@ router.post("/signup", async (req, res) => {
 });
 
 //-------------------------------------------------------------------------------------------------------
+//                                            Login of Donor
+
+router.get("/login",async(req,res)=>{
+  try{
+    const a=await Donor.findOne({email:req.body.email})
+    if(a){
+      const validated=await bcrypt.compare(req.body.password, a.password);
+      if(validated){
+        res.status(200).json(a);
+      }
+      else{
+        res.status(400).json("Wrong Password!")
+      }
+    }
+    else{
+      res.status(400).json("No Such User Found!")
+    }
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+//-------------------------------------------------------------------------------------------------------
 //                                         Updation Of Details 
 //                                                  &
 //                                           Feedback Submit
@@ -111,6 +135,28 @@ router.post("/newblooddonation/:donorid/:bloodbankid", async (req, res) => {
   }
 });
 
+//-------------------------------------------------------------------------------------------------------
+//                                             New Organ Donation
+
+// router.put("/neworgandonation/:donorid",async(req,res)=>{
+//   try{
+//     const donor=await Donor.findById(req.params.donorid);
+//     if(!donor.organRequest){
+//       Donor.findByIdAndUpdate(req.params.donorid,{organRequest:true},{new:true},function(err,don){
+//         if(err){
+//           res.status(502).json(err);
+//         }
+//         res.status(200).json(don);
+//       })
+//     }
+//     else{
+//       res.status(501).json("The Donor Has Already Registered For Kidney Donation!")
+//     }
+//   }
+//   catch(err){
+//     res.status(500).json(err);
+//   }
+// })
 //-------------------------------------------------------------------------------------------------------
 //                                         Your Appointments
 

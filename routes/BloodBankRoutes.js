@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const BloodBank = require("../models/BloodBank");
 const BloodDonation = require("../models/BloodDonation");
-const OnSpotDonation=require("../models/OnSpotDonation");
 const bcrypt = require("bcrypt");
 const BloodRequest = require("../models/BloodRequest");
 const Donor = require("../models/Donor");
@@ -30,6 +29,30 @@ router.post("/signup", async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+//-------------------------------------------------------------------------------------------------------
+//                                            Login of Blood Bank
+
+router.get("/login",async(req,res)=>{
+  try{
+    const a=await BloodBank.findOne({email:req.body.email})
+    if(a){
+      const validated=await bcrypt.compare(req.body.password, a.password);
+      if(validated){
+        res.status(200).json(a);
+      }
+      else{
+        res.status(400).json("Wrong Password!")
+      }
+    }
+    else{
+      res.status(400).json("No Such User Found!")
+    }
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
 
 //-------------------------------------------------------------------------------------------------------
 //                                         Updation Of Details
@@ -230,6 +253,16 @@ router.put("/appointments/upcoming/complete/:blooddonationid",async(req,res)=>{
         })
       })
     }).populate('donorDetails').populate('bloodbankDetails')
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+// Complete -> Details About To Be Written Are -> Insert Data
+router.get("/appointments/upcoming/complete/insertdata/:blooddonationid",async(req,res)=>{
+  try{
+
   }
   catch(err){
     res.status(500).json(err);

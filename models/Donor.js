@@ -85,12 +85,6 @@ const DonorSchema =mongoose.Schema({
     type:Date
   },
 
-  dead:{
-    type:Boolean,
-    default:false,
-    required:true
-  },
-
   permanentbanreason:{
     type:String,
     default:"false",
@@ -130,36 +124,71 @@ const DonorSchema =mongoose.Schema({
 
   feedback:{
     type:String
+  },
+
+  dead:{
+    type:Boolean,
+    default:false,
+    required:true
+  },
+
+  organRequest:{
+    type:Boolean,
+    default:false,
+    required:true
+  },
+
+  familyPermission:{
+    type:Boolean,
+    default:false,
+    required:true
+  },
+
+  height:{
+    type:Number
+  },
+
+  weight:{
+    type:Number
+  },
+
+  ethnicity:{
+    type:String,
+    enum:["American Indian","Asian","Black","Hispanic","Pacific Islander","White","Multi Racial"]
+  },
+
+  hypertension:{
+    type:Boolean
+  },
+
+  diabetes:{
+    type:Boolean
+  },
+
+  causeOfDeath:{
+    type:String,
+    enum:["Anoxia","Cerebrovascular Accident","Head Trauma","CNS Tumor","Other"]
+  },
+
+  creatinine:{
+    type:Number
+  },
+
+  hcv:{
+    type:Boolean
+  },
+
+  dcd:{
+    type:Boolean
+  },
+
+  kdrimed:{
+    type:Number
+  },
+
+  kdpi:{
+    type:Number
   }
-
-//   userid: {
-//     type: Number,
-//     required: true
-//   },
-
-//   relationship:{
-//     type:String
-//   },
-
-//   familyPermission:{
-//     type:Boolean
-//   },
-
-//   causeOfDeath:{
-//     type:"String"
-//   },
-
-//   deathDate:{
-//     type:Date
-//   },
-
-//   ddoperationDate:{
-//     type:Date
-//   },
-
-//   medicaldetails:{
-//     type:String
-//   },
 
 },
 { timestamps: true });

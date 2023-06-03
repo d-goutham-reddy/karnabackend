@@ -25,6 +25,30 @@ router.post("/create", async (req, res) => {
 });
 
 //-------------------------------------------------------------------------------------------------------
+//                                            Login of Admin
+
+router.get("/login",async(req,res)=>{
+  try{
+    const a=await Admin.findOne({email:req.body.email})
+    if(a){
+      const validated=await bcrypt.compare(req.body.password, a.password);
+      if(validated){
+        res.status(200).json(a);
+      }
+      else{
+        res.status(400).json("Wrong Password!")
+      }
+    }
+    else{
+      res.status(400).json("No Such User Found!")
+    }
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+//-------------------------------------------------------------------------------------------------------
 //                                         Verify Registrations
 
 // Blood Bank
@@ -111,6 +135,27 @@ router.delete("/registrations/hospital/cancel/:hospitalid",async(req,res)=>{
       }
       res.status(200).json(hosp);
     })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+//-------------------------------------------------------------------------------------------------------
+router.get("/gothillaguru",async(req,res)=>{
+  try{
+    
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+//-------------------------------------------------------------------------------------------------------
+
+router.post("/geolocator",async(req,res)=>{
+  try{
+
   }
   catch(err){
     res.status(500).json(err);

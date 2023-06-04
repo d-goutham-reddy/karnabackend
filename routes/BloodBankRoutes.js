@@ -33,7 +33,7 @@ router.post("/signup", async (req, res) => {
 //-------------------------------------------------------------------------------------------------------
 //                                            Login of Blood Bank
 
-router.get("/login",async(req,res)=>{
+router.post("/login",async(req,res)=>{
   try{
     const a=await BloodBank.findOne({email:req.body.email})
     if(a){

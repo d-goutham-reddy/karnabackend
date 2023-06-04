@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const Hospital = require("./Hospital");
+const Donor = require("./Donor");
 
 const OrganRequestSchema = mongoose.Schema({
 
@@ -28,11 +30,6 @@ const OrganRequestSchema = mongoose.Schema({
         required: true
     },
     
-    age: {
-        type: Number,
-        required: true
-    },
-    
     bloodgroup: {
         type: String,
         enum:["A+","A-","B+","B-","O+","O-","AB+","AB-"],
@@ -51,11 +48,6 @@ const OrganRequestSchema = mongoose.Schema({
 
     dialysisDate:{
         type:Date,
-        required:true
-    },
-
-    dialysisDays:{
-        type:Number,
         required:true
     },
 
@@ -118,7 +110,24 @@ const OrganRequestSchema = mongoose.Schema({
     otherdetails:{
         type:String,
         required:true
-    }
+    },
+
+    rawepts:{
+        type:Number,
+        required:true
+    },
+
+    epts:{
+        type:Number,
+        required:true
+    },
+
+    donorDetails:{ type: Schema.Types.ObjectId, ref: Donor },
+
+    fromHospital:{ type: Schema.Types.ObjectId, ref: Hospital },
+
+    toHospital:{ type: Schema.Types.ObjectId, ref: Hospital },
+    
 },
 { timestamps: true });
 module.exports=mongoose.model("OrganRequest",OrganRequestSchema);

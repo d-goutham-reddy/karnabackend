@@ -38,7 +38,7 @@ router.post("/signup", async (req, res) => {
 //-------------------------------------------------------------------------------------------------------
 //                                            Login of Donor
 
-router.get("/login",async(req,res)=>{
+router.post("/login",async(req,res)=>{
   try{
     const a=await Donor.findOne({email:req.body.email})
     if(a){

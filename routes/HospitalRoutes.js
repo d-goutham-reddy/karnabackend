@@ -6,6 +6,7 @@ const BloodPacket = require("../models/BloodPacket");
 const BloodDonation = require("../models/BloodDonation");
 const Donor = require("../models/Donor");
 const BloodBank = require("../models/BloodBank");
+const OrganRequest = require("../models/OrganRequest");
 
 //-------------------------------------------------------------------------------------------------------
 //                                           Registration of Hospital
@@ -34,7 +35,7 @@ router.post("/signup", async (req, res) => {
 //-------------------------------------------------------------------------------------------------------
 //                                            Login of Hospital
 
-router.get("/login",async(req,res)=>{
+router.post("/login",async(req,res)=>{
   try{
     const a=await Hospital.findOne({email:req.body.email})
     if(a){
@@ -118,22 +119,263 @@ router.post("/requests/create/blood/:hospitalid",async(req,res)=>{
   }
 })
 
-router.post("/requests/create/organ",async(req,res)=>{
+router.post("/requests/create/organ/:hospitalid",async(req,res)=>{
   try{
+    let rawepts=0;
+    let epts=0;
+
+    var today=new Date('2022-01-01T12:00:00');
+    const a=req.body.dialysisDate
+    var date = new Date(a);
+    var convertedDate = date.toISOString();
+    var dater = new Date(convertedDate);
+    var timeDiff = today.getTime() - dater.getTime();
+    const daysPassed = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const fractionaldialysis=daysPassed/365.25;
+    
+    const dob=req.body.DOB
+    var dobdate = new Date(dob);
+    var converteddobDate = dobdate.toISOString();
+    var daterdob = new Date(converteddobDate);
+    var timeDiffdob = today.getTime() - daterdob.getTime();
+    const daysPasseddob = Math.floor(timeDiffdob / (1000 * 60 * 60 * 24));
+    const fractionalage=daysPasseddob/365.25;
+
+    rawepts=0.047*Math.max(fractionalage-25, 0)+0.315*Math.log(fractionaldialysis+1);
+    if(req.body.diabetes){
+      rawepts+=-0.015*Math.max(fractionalage-25, 0)-0.099*Math.log(fractionaldialysis+1)+1.262;
+    }
+    if(req.body.priororgantransplant){
+      rawepts+=0.398;
+      if(req.body.diabetes){
+        rawepts+=-0.237;
+      }
+    }
+    if(fractionaldialysis<=0){
+      if(req.body.diabetes){
+        rawepts+=-0.348;
+      }
+      rawepts+=0.130;
+    }
+
+    if (rawepts > -999999999.0000 && rawepts <= 0.01018270481040) {
+      epts = 0.00;
+    } else if (rawepts > 0.01018270481040 && rawepts <= 0.22506076343394) {
+      epts = 1.00;
+    } else if (rawepts > 0.22506076343394 && rawepts <= 0.40495482546201) {
+      epts = 2.00;
+    } else if (rawepts > 0.40495482546201 && rawepts <= 0.52668514715948) {
+      epts = 3.00;
+    } else if (rawepts > 0.52668514715948 && rawepts <= 0.62047375671598) {
+      epts = 4.00;
+    } else if (rawepts > 0.62047375671598 && rawepts <= 0.71217182144415) {
+      epts = 5.00;
+    } else if (rawepts > 0.71217182144415 && rawepts <= 0.79382272416153) {
+      epts = 6.00;
+    } else if (rawepts > 0.79382272416153 && rawepts <= 0.86729842573580) {
+      epts = 7.00;
+    } else if (rawepts > 0.86729842573580 && rawepts <= 0.93498357289528) {
+      epts = 8.00;
+    } else if (rawepts > 0.93498357289528 && rawepts <= 0.99597348476971) {
+      epts = 9.00;
+    } else if (rawepts > 0.99597348476971 && rawepts <= 1.05786789869952) {
+      epts = 10.00;
+    } else if (rawepts > 1.05786789869952 && rawepts <= 1.11693566050650) {
+      epts = 11.00;
+    } else if (rawepts > 1.11693566050650 && rawepts <= 1.17275499673116) {
+      epts = 12.00;
+    } else if (rawepts > 1.17275499673116 && rawepts <= 1.22631279945243) {
+      epts = 13.00;
+    } else if (rawepts > 1.22631279945243 && rawepts <= 1.27416204029441) {
+      epts = 14.00;
+    } else if (rawepts > 1.27416204029441 && rawepts <= 1.32193032901076) {
+      epts = 15.00;
+    } else if (rawepts > 1.32193032901076 && rawepts <= 1.36766159145183) {
+      epts = 16.00;
+    } else if (rawepts > 1.36766159145183 && rawepts <= 1.41251129363450) {
+      epts = 17.00;
+    } else if (rawepts > 1.41251129363450 && rawepts <= 1.45407460643395) {
+      epts = 18.00;
+    } else if (rawepts > 1.45407460643395 && rawepts <= 1.49615263518138) {
+      epts = 19.00;
+    } else if (rawepts > 1.49615263518138 && rawepts <= 1.53510169752232) {
+      epts = 20.00;
+    } else if (rawepts > 1.53510169752232 && rawepts <= 1.57194455852156) {
+      epts = 21.00;
+    } else if (rawepts > 1.57194455852156 && rawepts <= 1.60810335386721) {
+      epts = 22.00;
+    } else if (rawepts > 1.60810335386721 && rawepts <= 1.64129842573580) {
+      epts = 23.00;
+    } else if (rawepts > 1.64129842573580 && rawepts <= 1.67214899950875) {
+      epts = 24.00;
+    } else if (rawepts > 1.67214899950875 && rawepts <= 1.70203901437372) {
+      epts = 25.00;
+    } else if (rawepts > 1.70203901437372 && rawepts <= 1.73137577002053) {
+      epts = 26.00;
+    } else if (rawepts > 1.73137577002053 && rawepts <= 1.75916837782341) {
+      epts = 27.00;
+    } else if (rawepts > 1.75916837782341 && rawepts <= 1.78568035592060) {
+      epts = 28.00;
+    } else if (rawepts > 1.78568035592060 && rawepts <= 1.81224093086927) {
+      epts = 29.00;
+    } else if (rawepts > 1.81224093086927 && rawepts <= 1.83669048683774) {
+      epts = 30.00;
+    } else if (rawepts > 1.83669048683774 && rawepts <= 1.86111365374575) {
+      epts = 31.00;
+    } else if (rawepts > 1.86111365374575 && rawepts <= 1.88477236354207) {
+      epts = 32.00;
+    } else if (rawepts > 1.88477236354207 && rawepts <= 1.90643999445176) {
+      epts = 33.00;
+    } else if (rawepts > 1.90643999445176 && rawepts <= 1.92833430315357) {
+      epts = 34.00;
+    } else if (rawepts > 1.92833430315357 && rawepts <= 1.95061672659645) {
+      epts = 35.00;
+    } else if (rawepts > 1.95061672659645 && rawepts <= 1.97180487135921) {
+      epts = 36.00;
+    } else if (rawepts > 1.97180487135921 && rawepts <= 1.99204930532186) {
+      epts = 37.00;
+    } else if (rawepts > 1.99204930532186 && rawepts <= 2.01394354154568) {
+      epts = 38.00;
+    } else if (rawepts > 2.01394354154568 && rawepts <= 2.03469979247238) {
+      epts = 39.00;
+    } else if (rawepts > 2.03469979247238 && rawepts <= 2.05470362236001) {
+      epts = 40.00;
+    } else if (rawepts > 2.05470362236001 && rawepts <= 2.07314715947981) {
+      epts = 41.00;
+    } else if (rawepts > 2.07314715947981 && rawepts <= 2.09049418206708) {
+      epts = 42.00;
+    } else if (rawepts > 2.09049418206708 && rawepts <= 2.10819164955510) {
+      epts = 43.00;
+    } else if (rawepts > 2.10819164955510 && rawepts <= 2.12593159093198) {
+      epts = 44.00;
+    } else if (rawepts > 2.12593159093198 && rawepts <= 2.14428747433265) {
+      epts = 45.00;
+    } else if (rawepts > 2.14428747433265 && rawepts <= 2.16003492859569) {
+      epts = 46.00;
+    } else if (rawepts > 2.16003492859569 && rawepts <= 2.17748138612887) {
+      epts = 47.00;
+    } else if (rawepts > 2.17748138612887 && rawepts <= 2.19422578065599) {
+      epts = 48.00;
+    } else if (rawepts > 2.19422578065599 && rawepts <= 2.21008350444901) {
+      epts = 49.00;
+    } else if (rawepts > 2.21008350444901 && rawepts <= 2.22681724845996) {
+      epts = 50.00;
+    } else if (rawepts > 2.22681724845996 && rawepts <= 2.24248665297741) {
+      epts = 51.00;
+    } else if (rawepts > 2.24248665297741 && rawepts <= 2.25866298097784) {
+      epts = 52.00;
+    } else if (rawepts > 2.25866298097784 && rawepts <= 2.27414579055441) {
+      epts = 53.00;
+    } else if (rawepts > 2.27414579055441 && rawepts <= 2.28965674569174) {
+      epts = 54.00;
+    } else if (rawepts > 2.28965674569174 && rawepts <= 2.30496646132786) {
+      epts = 55.00;
+    } else if (rawepts > 2.30496646132786 && rawepts <= 2.32064887063655) {
+      epts = 56.00;
+    } else if (rawepts > 2.32064887063655 && rawepts <= 2.33546300210562) {
+      epts = 57.00;
+    } else if (rawepts > 2.33546300210562 && rawepts <= 2.35058110882957) {
+      epts = 58.00;
+    } else if (rawepts > 2.35058110882957 && rawepts <= 2.36495682765023) {
+      epts = 59.00;
+    } else if (rawepts > 2.36495682765023 && rawepts <= 2.37956850034990) {
+      epts = 60.00;
+    } else if (rawepts > 2.37956850034990 && rawepts <= 2.39331000806028) {
+      epts = 61.00;
+    } else if (rawepts > 2.39331000806028 && rawepts <= 2.40794239525345) {
+      epts = 62.00;
+    } else if (rawepts > 2.40794239525345 && rawepts <= 2.42332922655715) {
+      epts = 63.00;
+    } else if (rawepts > 2.42332922655715 && rawepts <= 2.43824748244487) {
+      epts = 64.00;
+    } else if (rawepts > 2.43824748244487 && rawepts <= 2.45301341435239) {
+      epts = 65.00;
+    } else if (rawepts > 2.45301341435239 && rawepts <= 2.46883709787817) {
+      epts = 66.00;
+    } else if (rawepts > 2.46883709787817 && rawepts <= 2.48377825234404) {
+      epts = 67.00;
+    } else if (rawepts > 2.48377825234404 && rawepts <= 2.49765884856653) {
+      epts = 68.00;
+    } else if (rawepts > 2.49765884856653 && rawepts <= 2.51217225971966) {
+      epts = 69.00;
+    } else if (rawepts > 2.51217225971966 && rawepts <= 2.52701858141310) {
+      epts = 70.00;
+    } else if (rawepts > 2.52701858141310 && rawepts <= 2.54203650226714) {
+      epts = 71.00;
+    } else if (rawepts > 2.54203650226714 && rawepts <= 2.55860095824778) {
+      epts = 72.00;
+    } else if (rawepts > 2.55860095824778 && rawepts <= 2.57424912221794) {
+      epts = 73.00;
+    } else if (rawepts > 2.57424912221794 && rawepts <= 2.59040383299110) {
+      epts = 74.00;
+    } else if (rawepts > 2.59040383299110 && rawepts <= 2.60722141715292) {
+      epts = 75.00;
+    } else if (rawepts > 2.60722141715292 && rawepts <= 2.62498083504449) {
+      epts = 76.00;
+    } else if (rawepts > 2.62498083504449 && rawepts <= 2.64263627984686) {
+      epts = 77.00;
+    } else if (rawepts > 2.64263627984686 && rawepts <= 2.65921246229145) {
+      epts = 78.00;
+    } else if (rawepts > 2.65921246229145 && rawepts <= 2.67635098661546) {
+      epts = 79.00;
+    } else if (rawepts > 2.67635098661546 && rawepts <= 2.69390568835368) {
+      epts = 80.00;
+    } else if (rawepts > 2.69390568835368 && rawepts <= 2.71193480771995) {
+      epts = 81.00;
+    } else if (rawepts > 2.71193480771995 && rawepts <= 2.73135215563315) {
+      epts = 82.00;
+    } else if (rawepts > 2.73135215563315 && rawepts <= 2.75130096122788) {
+      epts = 83.00;
+    } else if (rawepts > 2.75130096122788 && rawepts <= 2.77165233216905) {
+      epts = 84.00;
+    } else if (rawepts > 2.77165233216905 && rawepts <= 2.79135338420568) {
+      epts = 85.00;
+    } else if (rawepts > 2.79135338420568 && rawepts <= 2.81295668156198) {
+      epts = 86.00;
+    } else if (rawepts > 2.81295668156198 && rawepts <= 2.83484476578948) {
+      epts = 87.00;
+    } else if (rawepts > 2.83484476578948 && rawepts <= 2.85613932665133) {
+      epts = 88.00;
+    } else if (rawepts > 2.85613932665133 && rawepts <= 2.87925967560719) {
+      epts = 89.00;
+    } else if (rawepts > 2.87925967560719 && rawepts <= 2.90216882375627) {
+      epts = 90.00;
+    } else if (rawepts > 2.90216882375627 && rawepts <= 2.92553421191676) {
+      epts = 91.00;
+    } else if (rawepts > 2.92553421191676 && rawepts <= 2.95158539985534) {
+      epts = 92.00;
+    } else if (rawepts > 2.95158539985534 && rawepts <= 2.97980484197221) {
+      epts = 93.00;
+    } else if (rawepts > 2.97980484197221 && rawepts <= 3.01023840891310) {
+      epts = 94.00;
+    } else if (rawepts > 3.01023840891310 && rawepts <= 3.03924343753914) {
+      epts = 95.00;
+    } else if (rawepts > 3.03924343753914 && rawepts <= 3.07520998352032) {
+      epts = 96.00;
+    } else if (rawepts > 3.07520998352032 && rawepts <= 3.11767479308614) {
+      epts = 97.00;
+    } else if (rawepts > 3.11767479308614 && rawepts <= 3.17001351953696) {
+      epts = 98.00;
+    } else if (rawepts > 3.17001351953696 && rawepts <= 3.25028785715597) {
+      epts = 99.00;
+    } else if (rawepts > 3.25028785715597 && rawepts <= 999999999.0000) {
+      epts = 100.00;
+    } else {
+      epts = -1;
+    }
+
     const newreq=new OrganRequest({
       name:req.body.name,
       address:req.body.address,
       phone: req.body.phone,
       sex:req.body.sex,
       DOB:req.body.DOB,
-      age:req.body.age,
       bloodgroup:req.body.bloodgroup,
       diabetes:req.body.diabetes,
       priororgantransplant:req.body.priororgantransplant,      
       dialysisDate:req.body.dialysisDate,
-      dialysisDays:req.body.dialysisDays,
       kidneydisease:req.body.kidneydisease,
-      hlatype:req.params.hlatype,
+      hlatype:req.body.hlatype,
       hlatypingmethod:req.body.hlatypingmethod,
       pralevel:req.body.pralevel,
       hlaantigen:req.body.hlaantigen,
@@ -142,8 +384,12 @@ router.post("/requests/create/organ",async(req,res)=>{
       height:req.body.height,
       weight:req.body.weight,
       surgicalevaluationremarks:req.body.surgicalevaluationremarks,
-      otherdetails:req.body.otherdetails
+      otherdetails:req.body.otherdetails,
+      rawepts:rawepts,
+      epts:epts,
+      toHospital:req.params.hospitalid
     });
+    
     newreq.save(function(err,org){
       if(err){
         res.status(500).json(err);
@@ -155,6 +401,7 @@ router.post("/requests/create/organ",async(req,res)=>{
     res.status(500).json(err);
   }
 })
+
 // Waiting Requests
 router.get("/requests/waiting/:hospitalid",async(req,res)=>{
   try{
@@ -687,8 +934,7 @@ router.put("/donorregistry/confirm/yes/submit/:donorid",async(req,res)=>{
   else{
     KDPI=-1;
   }
-  
-    Donor.findByIdAndUpdate(req.params.donorid,{age:req.body.age,height:req.body.height,weight:req.body.weight,ethnicity:req.body.ethnicity,hypertension:req.body.hypertension,diabetes:req.body.diabetes,causeOfDeath:req.body.causeOfDeath,creatinine:req.body.creatinine,hcv:req.body.hcv,dcd:req.body.dcd,kdrimed:kdrimed,kdpi:KDPI},{new:true},function(err,don){
+    Donor.findByIdAndUpdate(req.params.donorid,{age:req.body.age,height:req.body.height,weight:req.body.weight,ethnicity:req.body.ethnicity,hypertension:req.body.hypertension,diabetes:req.body.diabetes,causeOfDeath:req.body.causeOfDeath,creatinine:req.body.creatinine,hcv:req.body.hcv,dcd:req.body.dcd,kdrimed:kdrimed,kdpi:KDPI,dead:true},{new:true},function(err,don){
       if(err){
         res.status(500).json(err);
       }

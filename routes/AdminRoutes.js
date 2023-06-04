@@ -27,7 +27,7 @@ router.post("/create", async (req, res) => {
 //-------------------------------------------------------------------------------------------------------
 //                                            Login of Admin
 
-router.get("/login",async(req,res)=>{
+router.post("/login",async(req,res)=>{
   try{
     const a=await Admin.findOne({email:req.body.email})
     if(a){

@@ -39,7 +39,12 @@ router.post("/login",async(req,res)=>{
     if(a){
       const validated=await bcrypt.compare(req.body.password, a.password);
       if(validated){
-        res.status(200).json(a);
+        if(a.verificationStatus=="Verified"){
+          res.status(200).json(a);
+        }
+        else{
+          res.status(400).json("THE REQUESTED ACCOUNT REGESTRATION IS YET TO BE VERIFIED BY ADMIN. SO, PLEASE TRY AGAIN LATER")
+        }
       }
       else{
         res.status(400).json("Wrong Password!")

@@ -1,17 +1,20 @@
 const mongoose = require("mongoose");
+const Schema=require('mongoose').Schema;
 const Hospital = require("./Hospital");
 const Donor = require("./Donor");
 
 const OrganRequestSchema = mongoose.Schema({
 
+    status:{
+        type:String,
+        required:true,
+        default:"Unbooked",
+        enum:["Unbooked","Booked","Arrived"]
+    },
+
     name:{
         type:String,
         required:true
-    },
-
-    address: {
-        type: String,
-        required: true
     },
     
     phone: {
@@ -89,7 +92,7 @@ const OrganRequestSchema = mongoose.Schema({
     sensitizationreason:{
         type:String,
         required:true,
-        enum:["Previous Transplantation","Blood Transfusion","Pregnancy"]
+        enum:["Previous Transplantation","Blood Transfusion","Pregnancy","NA"]
     },
 
     height:{

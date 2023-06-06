@@ -142,25 +142,4 @@ router.delete("/registrations/hospital/cancel/:hospitalid",async(req,res)=>{
 })
 
 //-------------------------------------------------------------------------------------------------------
-router.get("/gothillaguru",async(req,res)=>{
-  try{
-    
-  }
-  catch(err){
-    res.status(500).json(err);
-  }
-})
-
-//-------------------------------------------------------------------------------------------------------
-
-router.post("/geolocator",async(req,res)=>{
-  try{
-
-  }
-  catch(err){
-    res.status(500).json(err);
-  }
-})
-
-//-------------------------------------------------------------------------------------------------------
 module.exports = router;

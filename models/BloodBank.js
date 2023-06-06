@@ -60,24 +60,8 @@ const BloodBankSchema = mongoose.Schema({
     type:String,
     default:"Rookie",
     enum:["Rookie","Enthusiast","Elite","Pro","Guru","Specialist","Champion"]
-  },
-
-//   verificationstatus:{
-//     type:String,
-//     default:"Pending",
-//     enum:["Verified","Pending","Rejected"],
-//     required:true
-//   },
-
-//   cancelReason:{
-//     type: String
-//   },
-
-//   userid: {
-//     type: Number,
-//     required: true,
-//   }
-
+  }
+  
 },
 { timestamps: true });
 module.exports=mongoose.model("BloodBank",BloodBankSchema);

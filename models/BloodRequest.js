@@ -80,8 +80,6 @@ const BloodRequestSchema = mongoose.Schema({
 
     hospitalDetails: { type: Schema.Types.ObjectId, ref: Hospital }
 
-    // bloodPacketDetails: { type: Schema.Types.ObjectId, ref: BloodPacket }
-
 },
 { timestamps: true });
 module.exports=mongoose.model("BloodRequest",BloodRequestSchema);

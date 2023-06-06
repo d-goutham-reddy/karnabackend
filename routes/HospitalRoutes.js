@@ -61,7 +61,7 @@ router.post("/login",async(req,res)=>{
   }
 })
 
-//-------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------
 //                                         Updation Of Details
 
 router.put("/updatedetails/:hospitalid",async(req,res)=>{
@@ -87,7 +87,7 @@ router.put("/updatedetails/:hospitalid",async(req,res)=>{
 }
 })
 
-//-------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------
 //                                         Blood Requests Management
 
 // Create New Blood Request
@@ -1259,6 +1259,29 @@ router.put("/transplantations/arrived/:organrequestid/:hospitalid",async(req,res
     else{
       res.status(404).json("Not Allowed To Confirm The Arrival")
     }
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+//------------------------------------------------------------------------------------------------------
+//                                          Emergency Service
+
+router.get("/emergencyservice",async(req,res)=>{
+  try{
+    Donor.find({volunteer:true,dead:false,permanentbanreason:"false"},function(err,don){
+      if(err){
+        res.status(501).json(err);
+      }
+      var list=[]
+      for(i of don){
+        if(i.eligibledate<new Date()){
+          list.push(i)
+        }
+      }
+      res.status(200).json(list);
+    })
   }
   catch(err){
     res.status(500).json(err);

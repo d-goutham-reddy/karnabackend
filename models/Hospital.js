@@ -46,22 +46,6 @@ const HospitalSchema = mongoose.Schema({
     enum:["Hospital"]
   }
 
-//   verificationstatus:{
-//     type:String,
-//     default:"Pending",
-//     enum:["Verified","Pending","Rejected"],
-//     required:true
-//   },
-
-//   cancelReason:{
-//     type: String
-//   },
-
-//   userid: {
-//     type: Number,
-//     required: true,
-//   }
-
 },
 { timestamps: true });
 module.exports=mongoose.model("Hospital",HospitalSchema);

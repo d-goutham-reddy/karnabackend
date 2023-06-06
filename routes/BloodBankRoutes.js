@@ -118,6 +118,28 @@ router.get("/feedbacks/:bloodbankid",async(req,res)=>{
   }
 })
 
+// Leadership Board
+router.get("/leadership/:bloodbankid",async(req,res)=>{
+  try{
+    BloodBank.find({verificationStatus:"Verified"}).sort({points:-1}).exec().then(
+      bbs=>{
+        const targetbb=bbs.find(bb=>bb._id==req.params.bloodbankid);
+        if(targetbb){
+          const position=bbs.findIndex(bb=>bb._id==req.params.bloodbankid)+1;
+          const msg=position+'/'+bbs.length
+          res.status(200).json(msg)
+        }
+        else{
+          res.status(404).json("Requested Blood Bank Not found")
+        }
+      }
+    )
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
 //-------------------------------------------------------------------------------------------------------
 //                                         Appointments Management
 
@@ -743,94 +765,6 @@ router.get("/requests/delivered/:bloodbankid",async(req,res)=>{
     res.status(500).json(err);
   }
 })
-
-//-------------------------------------------------------------------------------------------------------
-//                                      Blood Bank Appointments
-
-//                                        Create An On-Spot Donation
-// router.post("/onspotdonation/:bloodbankid",async(req,res)=>{
-//   try {
-//     const bb=await BloodBank.findById(req.params.bloodbankid);
-//     const newonspotdonation = new OnSpotDonation({
-//       bloodgroup:req.body.bloodgroup,
-//       location:bb.name,
-//       appdate:req.body.appdate,
-//       time:req.body.time,
-//       fname:req.body.fname,
-//       mname:req.body.mname,
-//       lname:req.body.lname,
-//       email: req.body.email,
-//       address:req.body.address,
-//       phone:req.body.phone,
-//       sex:req.body.sex,
-//       DOB:req.body.DOB,
-//       age:req.body.age,
-//       bloodbankDetails:req.params.bloodbankid
-//     });
-//     const nosd = await newonspotdonation.save();
-//     OnSpotDonation.findById(nosd._id,function(err,osd){
-//       if(err){
-//         res.status(500).json(err);
-//       }
-//       res.status(200).json(osd);
-//     }).populate('bloodbankDetails');
-//   }
-//   catch(err){
-//     res.status(500).json(err);
-//   }
-// })
-
-//                                       On Spot Appointments
-
-// Upcoming
-// router.get("/onspot/upcoming/:bloodbankid",async(req,res)=>{
-//   try{
-//     OnSpotDonation.find({bloodbankDetails:req.params.bloodbankid,status:"Upcoming"},function(err,osd){
-//       if(err){
-//         res.status(500).json(err);
-//       }
-//       res.status(200).json(osd);
-//     }).sort({appdate:"asc"}).populate('bloodbankDetails');
-//   }
-//   catch(err){
-//     res.status(500).json(err);
-//   }
-// })
-
-// // Cancel Upcoming Appointment
-// router.put("/onspot/upcoming/cancel/:onspotdonationid",async(req,res)=>{
-//   try{
-//     OnSpotDonation.findByIdAndUpdate(req.params.onspotdonationid,{ 
-//       cancelReason:req.body.cancelReason,
-//       status:"Cancelled"
-//     },
-//     {new:true},
-//     function(err,osd){
-//       if(err){
-//         res.status(500).json(err);
-//       }
-//       res.status(200).json(osd);
-//     }).populate('bloodbankDetails')
-//   }
-//   catch(err){
-//     res.status(500).json(err);
-//   }
-// })
-
-// // Cancelled Appointments
-// router.get("/onspot/cancelled/:bloodbankid",async(req,res)=>{
-//   try{
-//     OnSpotDonation.find({bloodbankDetails:req.params.bloodbankid,status:"Cancelled"},function(err,osd){
-//       if(err){
-//         res.status(500).json(err);
-//       }
-//       res.status(200).json(osd);
-//     }).populate('bloodbankDetails').sort({updatedAt:-1})
-//   }
-//   catch(err){
-//     res.status(500).json(err);
-//   }
-// })
 
 //-------------------------------------------------------------------------------------------------------
 module.exports = router;

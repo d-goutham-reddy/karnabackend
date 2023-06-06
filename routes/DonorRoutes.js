@@ -90,6 +90,22 @@ router.put("/updatedetails/:donorid",async(req,res)=>{
 //-------------------------------------------------------------------------------------------------------
 //                                             New Blood Donation
 
+// New Blood Donation -> Choose the location where you wish to donate
+router.get("/newblooddonation/location",async(req,res)=>{
+  try{
+    BloodBank.find({verificationStatus:"Verified"},function(err,bb){
+      if(err){
+        res.status(501).json(err);
+      }
+      res.status(200).json(bb)
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+// New Blood Donation -> Book
 router.post("/newblooddonation/:donorid/:bloodbankid", async (req, res) => {
   try {
     const donor = await Donor.findById(req.params.donorid);
@@ -135,28 +151,6 @@ router.post("/newblooddonation/:donorid/:bloodbankid", async (req, res) => {
   }
 });
 
-//-------------------------------------------------------------------------------------------------------
-//                                             New Organ Donation
-
-// router.put("/neworgandonation/:donorid",async(req,res)=>{
-//   try{
-//     const donor=await Donor.findById(req.params.donorid);
-//     if(!donor.organRequest){
-//       Donor.findByIdAndUpdate(req.params.donorid,{organRequest:true},{new:true},function(err,don){
-//         if(err){
-//           res.status(502).json(err);
-//         }
-//         res.status(200).json(don);
-//       })
-//     }
-//     else{
-//       res.status(501).json("The Donor Has Already Registered For Kidney Donation!")
-//     }
-//   }
-//   catch(err){
-//     res.status(500).json(err);
-//   }
-// })
 //-------------------------------------------------------------------------------------------------------
 //                                         Your Appointments
 
@@ -260,6 +254,28 @@ router.get("/words/:donorid",async(req,res)=>{
   }
 })
 
+// Leadership Board
+router.get("/leadership/:donorid",async(req,res)=>{
+  try{
+    Donor.find({}).sort({points:-1}).exec().then(
+      donors=>{
+        const targetdonor=donors.find(donor=>donor._id==req.params.donorid);
+        if(targetdonor){
+          const position=donors.findIndex(donor=>donor._id==req.params.donorid)+1;
+          const msg=position+'/'+donors.length
+          res.status(200).json(msg)
+        }
+        else{
+          res.status(404).json("Requested Donor Not found")
+        }
+      }
+    )
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
 //-------------------------------------------------------------------------------------------------------
 //                                  Just For Practice (Not Used In Front-End)
 
@@ -295,5 +311,4 @@ router.get("/getblooddonationdetails/:blooddonationid",async(req,res)=>{
 })
 
 //-------------------------------------------------------------------------------------------------------
-
 module.exports = router;

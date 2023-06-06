@@ -61,5 +61,20 @@ router.get("/bloodpacketsdonated",async(req,res)=>{
   }
 })
 
+// Experiences In The Website
+router.get("/experiences",async(req,res)=>{
+  try{
+    Donor.find({feedback:{"$exists":true}},'feedback',function(err,don){
+      if(err){
+        res.status(500).json(err);
+      }
+      res.status(200).json(don);
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
 //-------------------------------------------------------------------------------------------------------
 module.exports = router;

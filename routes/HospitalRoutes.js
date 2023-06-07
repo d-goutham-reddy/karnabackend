@@ -88,7 +88,7 @@ router.put("/updatedetails/:hospitalid",async(req,res)=>{
 })
 
 //------------------------------------------------------------------------------------------------------
-//                                         Blood Requests Management
+//                                          Requests Management
 
 // Create New Blood Request
 router.post("/requests/create/blood/:hospitalid",async(req,res)=>{

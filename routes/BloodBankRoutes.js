@@ -70,7 +70,10 @@ router.put("/updatedetails/:bloodbankid",async(req,res)=>{
     }
     BloodBank.findByIdAndUpdate(req.params.bloodbankid,
       {
-        $set: req.body,
+        name: req.body.name,
+        password:req.body.password,
+        address:req.body.address,
+        phone:req.body.phone
       },
       { new: true },
       function(err,bloodbank){

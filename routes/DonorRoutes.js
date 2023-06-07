@@ -72,7 +72,21 @@ router.put("/updatedetails/:donorid",async(req,res)=>{
     }
     Donor.findByIdAndUpdate(req.params.donorid,
       {
-        $set: req.body,
+        fname:req.body.fname,
+        mname:req.body.mname,
+        lname:req.body.lname,
+        password: req.body.password,
+        address:req.body.address,
+        phone:req.body.phone,
+        sex:req.body.sex,
+        DOB:req.body.DOB,
+        age:req.body.age,
+        bloodgroup:req.body.bloodgroup,
+        aadharId:req.body.aadharId,
+        emergencycontactname:req.body.emergencycontactname,
+        emergencycontactphone:req.body.emergencycontactphone,
+        volunteer:req.body.volunteer,
+        organRequest:req.body.organRequest
       },
       { new: true },
       function(err,donor){
@@ -87,13 +101,28 @@ router.put("/updatedetails/:donorid",async(req,res)=>{
 }
 })
 
+// Feedback About Experience In Website
+router.put("/feedback/:donorid",async(req,res)=>{
+  try{
+    Donor.findByIdAndUpdate(req.params.donorid,{feedback:req.body.feedback},{new:true},function(err,don){
+      if(err){
+        res.status(500).json(err);
+      }
+      res.status(200).json(don);
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
 //-------------------------------------------------------------------------------------------------------
 //                                             New Blood Donation
 
 // New Blood Donation -> Choose the location where you wish to donate
 router.get("/newblooddonation/location",async(req,res)=>{
   try{
-    BloodBank.find({verificationStatus:"Verified"},function(err,bb){
+    BloodBank.find({verificationStatus:"Verified"},'name',function(err,bb){
       if(err){
         res.status(501).json(err);
       }
@@ -183,7 +212,8 @@ router.put("/upcomingappointments/cancel/:blooddonationid",async(req,res)=>{
         res.status(500).json(err);
       }
       res.status(200).json(bd);
-    }).populate('donorDetails').populate('bloodbankDetails')
+    })
+    // .populate('donorDetails').populate('bloodbankDetails')
   }
   catch(err){
     res.status(500).json(err);
@@ -198,7 +228,8 @@ router.get("/completedappointments/:donorid",async(req,res)=>{
         res.status(501).json(err);
       }
       res.status(200).json(bd);
-    }).populate('donorDetails').populate('bloodbankDetails').sort({updatedAt:"descending"})
+    }).populate('bloodbankDetails').sort({updatedAt:"descending"})
+    // .populate('donorDetails')
   }
   catch(err){
     res.status(500).json(err);
@@ -213,7 +244,8 @@ router.put("/completedappointments/feedback/:blooddonationid",async(req,res)=>{
         res.status(501).json(err);
       }
       res.status(200).json(bd);
-    }).populate('donorDetails').populate('bloodbankDetails')
+    }).populate('bloodbankDetails')
+    // .populate('donorDetails')
   }
   catch(err){
     res.status(500).json(err);

@@ -154,8 +154,8 @@ router.get("/appointments/upcoming/:bloodbankid",async(req,res)=>{
         res.status(500).json(err);
       }
       res.status(200).json(bd);
-    }).sort({appdate:1})
-    // .populate('donorDetails').populate('bloodbankDetails');
+    }).sort({appdate:1}).populate('donorDetails')
+    // .populate('bloodbankDetails');
   }
   catch(err){
     res.status(500).json(err);
@@ -178,7 +178,8 @@ router.put("/appointments/upcoming/complete/permanentban/:blooddonationid",async
             res.status(502).json(err);
           }
           res.status(200).json(newbd);
-        }).populate('donorDetails').populate('bloodbankDetails')
+        }).populate('donorDetails')
+        // .populate('bloodbankDetails')
       })
     })
   }
@@ -203,7 +204,8 @@ router.put("/appointments/upcoming/complete/temporaryban/:blooddonationid",async
             res.status(502).json(err);
           }
           res.status(200).json(newbd);
-        }).populate('donorDetails').populate('bloodbankDetails')
+        }).populate('donorDetails')
+        // .populate('bloodbankDetails')
       })
     })
   }
@@ -279,7 +281,8 @@ router.put("/appointments/upcoming/complete/:blooddonationid",async(req,res)=>{
               res.status(503).json(err);
             }
             res.status(200).json(newbd);
-          }).populate('donorDetails').populate('bloodbankDetails')
+          }).populate('donorDetails')
+          // .populate('bloodbankDetails')
         })
       })
     }).populate('donorDetails').populate('bloodbankDetails')
@@ -292,7 +295,7 @@ router.put("/appointments/upcoming/complete/:blooddonationid",async(req,res)=>{
 // Complete -> Details About To Be Written Are -> Insert Data
 router.get("/appointments/upcoming/complete/insertdata/:blooddonationid",async(req,res)=>{
   try{
-
+    res.status(200).json("Success")
   }
   catch(err){
     res.status(500).json(err);
@@ -312,7 +315,8 @@ router.put("/appointments/upcoming/cancel/:blooddonationid",async(req,res)=>{
         res.status(500).json(err);
       }
       res.status(200).json(bd);
-    }).populate('donorDetails').populate('bloodbankDetails')
+    }).populate('donorDetails')
+    // .populate('bloodbankDetails')
   }
   catch(err){
     res.status(500).json(err);
@@ -327,8 +331,8 @@ router.get("/appointments/completed/:bloodbankid",async(req,res)=>{
         res.status(500).json(err);
       }
       res.status(200).json(bd);
-    }).sort({updatedAt:"descending"})
-    // .populate('donorDetails').populate('bloodbankDetails')
+    }).sort({updatedAt:"descending"}).populate('donorDetails')
+    //.populate('bloodbankDetails')
   }
   catch(err){
     res.status(500).json(err);
@@ -343,8 +347,8 @@ router.get("/appointments/cancelled/:bloodbankid",async(req,res)=>{
         res.status(500).json(err);
       }
       res.status(200).json(bd);
-    }).sort({updatedAt:"descending"})
-    // .populate('donorDetails').populate('bloodbankDetails')
+    }).sort({updatedAt:"descending"}).populate('donorDetails')
+    //.populate('bloodbankDetails')
   }
   catch(err){
     res.status(500).json(err);
@@ -362,7 +366,8 @@ router.get("/stock/new/details/:bloodonationid",async(req,res)=>{
         res.status(501).json(err);
       }
       res.status(200).json(bd);
-    }).populate('donorDetails').populate('bloodbankDetails')
+    }).populate('donorDetails')
+    // .populate('bloodbankDetails')
   }
   catch(err){
     res.status(500).json(err);
@@ -372,7 +377,7 @@ router.get("/stock/new/details/:bloodonationid",async(req,res)=>{
 // Arrival Of New Packet -> Details(RFID) -> Proceed -> No, He's Permanently Banned
 router.put("/stock/new/permanentban/:blooddonationid",async(req,res)=>{
   try{
-    BloodDonation.findByIdAndUpdate(req.params.blooddonationid,{status:"Cancelled",cancelReason:"Donor has reportedly confessed about his disease or condition which makes him ineligible to donate blood for life."},{new:true},function(err,bd){
+    BloodDonation.findByIdAndUpdate(req.params.blooddonationid,{status:"Cancelled",cancelReason:"Donor has reportedly tested positive for a disease or condition which makes him ineligible to donate blood for life."},{new:true},function(err,bd){
       if(err){
         res.status(500).json(err);
       }
@@ -385,7 +390,8 @@ router.put("/stock/new/permanentban/:blooddonationid",async(req,res)=>{
             res.status(502).json(err);
           }
           res.status(200).json(newbd);
-        }).populate('donorDetails').populate('bloodbankDetails')
+        }).populate('donorDetails')
+        // .populate('bloodbankDetails')
       })
     })
   }
@@ -397,7 +403,7 @@ router.put("/stock/new/permanentban/:blooddonationid",async(req,res)=>{
 // Arrival Of New Packet -> Details(RFID) -> Proceed -> No, He's Temporarily Banned
 router.put("/stock/new/temporaryban/:blooddonationid",async(req,res)=>{
   try{
-    BloodDonation.findByIdAndUpdate(req.params.blooddonationid,{status:"Cancelled",cancelReason:"Donor has reportedly confessed about condition or lifestyle habbit or travel history, etc which makes him ineligible to donate for a certain period of time."},{new:true},function(err,bd){
+    BloodDonation.findByIdAndUpdate(req.params.blooddonationid,{status:"Cancelled",cancelReason:"Donor has reportedly tested positive for a condition or lifestyle habbit or travel history, etc which makes him ineligible to donate for a certain period of time."},{new:true},function(err,bd){
       if(err){
         res.status(500).json(err);
       }
@@ -410,7 +416,8 @@ router.put("/stock/new/temporaryban/:blooddonationid",async(req,res)=>{
             res.status(502).json(err);
           }
           res.status(200).json(newbd);
-        }).populate('donorDetails').populate('bloodbankDetails')
+        }).populate('donorDetails')
+        // .populate('bloodbankDetails')
       })
     })
   }
@@ -495,11 +502,11 @@ router.put("/stock/new/create/:blooddonationid",async(req,res)=>{
                 res.status(200).json(listBloodPackets)
               }).populate({
                 path : 'bloodDonationDetails',
-                populate: [{
-                  path: 'donorDetails'
-                },{
-                  path: 'bloodbankDetails'
-                }]
+                // populate: [{
+                //   path: 'donorDetails'
+                // },{
+                //   path: 'bloodbankDetails'
+                // }]
               })
             });
           }
@@ -555,27 +562,27 @@ router.put("/stock/new/create/:blooddonationid",async(req,res)=>{
                         res.status(200).json(listBloodPackets);
                       }).populate({
                         path : 'bloodDonationDetails',
-                        populate: [{
-                          path: 'donorDetails'
-                        },{
-                          path: 'bloodbankDetails'
-                        }]
+                        // populate: [{
+                        //   path: 'donorDetails'
+                        // },{
+                        //   path: 'bloodbankDetails'
+                        // }]
                       })
                     }).populate({
                       path : 'bloodDonationDetails',
-                      populate: [{
-                        path: 'donorDetails'
-                      },{
-                        path: 'bloodbankDetails'
-                      }]
+                      // populate: [{
+                      //   path: 'donorDetails'
+                      // },{
+                      //   path: 'bloodbankDetails'
+                      // }]
                     })
                   }).populate({
                     path : 'bloodDonationDetails',
-                    populate: [{
-                      path: 'donorDetails'
-                    },{
-                      path: 'bloodbankDetails'
-                    }]
+                    // populate: [{
+                    //   path: 'donorDetails'
+                    // },{
+                    //   path: 'bloodbankDetails'
+                    // }]
                   })
                 });
               });
@@ -584,6 +591,16 @@ router.put("/stock/new/create/:blooddonationid",async(req,res)=>{
         })
       })
     }).populate('donorDetails').populate('bloodbankDetails')
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+// Complete -> Details About To Be Written Are -> Insert Data
+router.get("/stock/new/create/insertdata/:bloodpacketid",async(req,res)=>{
+  try{
+    res.status(200).json("Success")
   }
   catch(err){
     res.status(500).json(err);
@@ -712,18 +729,18 @@ router.get("/requests/confirmed/:bloodbankid",async(req,res)=>{
       }
       var lbp=[]
       for(let b of bp){
-        if(b.bloodRequestDetails.status=="Confirmed"&&b.bloodDonationDetails.bloodbankDetails._id==req.params.bloodbankid){
+        if(b.bloodRequestDetails.status=="Confirmed"&&b.bloodDonationDetails.bloodbankDetails==req.params.bloodbankid){
           lbp.push(b);
         }
       }
       res.status(200).json(lbp);
     }).populate({
       path : 'bloodDonationDetails',
-      populate: [{
-        path: 'donorDetails'
-      },{
-        path: 'bloodbankDetails'
-      }]
+      // populate: [{
+      //   path: 'donorDetails'
+      // },{
+      //   path: 'bloodbankDetails'
+      // }]
     }).populate({
       path : 'bloodRequestDetails',
       populate: {
@@ -745,18 +762,18 @@ router.get("/requests/delivered/:bloodbankid",async(req,res)=>{
       }
       var lbp=[];
       for(let b of bp){
-        if(b.bloodRequestDetails.status=="Delivered"&&b.bloodDonationDetails.bloodbankDetails._id==req.params.bloodbankid){
+        if(b.bloodRequestDetails.status=="Delivered"&&b.bloodDonationDetails.bloodbankDetails==req.params.bloodbankid){
           lbp.push(b);
         }
       }
       res.status(200).json(lbp);
     }).populate({
       path : 'bloodDonationDetails',
-      populate: [{
-        path: 'donorDetails'
-      },{
-        path: 'bloodbankDetails'
-      }]
+      // populate: [{
+      //   path: 'donorDetails'
+      // },{
+      //   path: 'bloodbankDetails'
+      // }]
     }).populate({
       path : 'bloodRequestDetails',
       populate: {

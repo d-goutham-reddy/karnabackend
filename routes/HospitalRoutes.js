@@ -72,7 +72,10 @@ router.put("/updatedetails/:hospitalid",async(req,res)=>{
     }
     Hospital.findByIdAndUpdate(req.params.hospitalid,
       {
-        $set: req.body,
+        name: req.body.name,
+        password:req.body.password,
+        address:req.body.address,
+        phone:req.body.phone
       },
       { new: true },
       function(err,hosp){
@@ -414,7 +417,8 @@ router.get("/requests/waiting/:hospitalid",async(req,res)=>{
         res.status(500).json(err);
       }
       res.status(200).json(br);
-    }).populate('hospitalDetails').sort({createdAt:"ascending"})
+    }).sort({createdAt:"ascending"})
+    // .populate('hospitalDetails')
   }
   catch(err){
     res.status(500).json(err);
@@ -434,7 +438,8 @@ router.put("/requests/waiting/cancel/:bloodrequestid",async(req,res)=>{
         res.status(500).json(err);
       }
       res.status(200).json(br);
-    }).populate('hospitalDetails')
+    })
+    // .populate('hospitalDetails')
   }
   catch(err){
     res.status(500).json(err)
@@ -462,9 +467,9 @@ router.get("/requests/confirmed/:hospitalid",async(req,res)=>{
       }]
     }).populate({
       path : 'bloodRequestDetails',
-      populate: {
-        path: 'hospitalDetails'
-      }
+      // populate: {
+      //   path: 'hospitalDetails'
+      // }
     })
   }
   catch(err){
@@ -629,9 +634,9 @@ router.get("/requests/delivered/:hospitalid",async(req,res)=>{
       }]
     }).populate({
       path : 'bloodRequestDetails',
-      populate: {
-        path: 'hospitalDetails'
-      }
+      // populate: {
+      //   path: 'hospitalDetails'
+      // }
     })
   }
   catch(err){
@@ -647,7 +652,8 @@ router.get("/requests/cancelled/:hospitalid",async(req,res)=>{
         res.status(500).json(err);
       }
       res.status(200).json(br);
-    }).populate('hospitalDetails').sort({updatedAt:"desc"})
+    }).sort({updatedAt:"desc"})
+    // .populate('hospitalDetails')
   }
   catch(err){
     res.status(500).json(err);
@@ -938,7 +944,7 @@ router.put("/donorregistry/confirm/yes/submit/:donorid",async(req,res)=>{
   else{
     KDPI=-1;
   }
-    Donor.findByIdAndUpdate(req.params.donorid,{age:req.body.age,height:req.body.height,weight:req.body.weight,ethnicity:req.body.ethnicity,hypertension:req.body.hypertension,diabetes:req.body.diabetes,causeOfDeath:req.body.causeOfDeath,creatinine:req.body.creatinine,hcv:req.body.hcv,dcd:req.body.dcd,kdrimed:kdrimed,kdpi:KDPI,dead:true},{new:true},function(err,don){
+    Donor.findByIdAndUpdate(req.params.donorid,{age:req.body.age,height:req.body.height,weight:req.body.weight,ethnicity:req.body.ethnicity,hypertension:req.body.hypertension,diabetes:req.body.diabetes,causeOfDeath:req.body.causeOfDeath,creatinine:req.body.creatinine,hcv:req.body.hcv,dcd:req.body.dcd,kdrimed:kdrimed,kdpi:KDPI,dead:true,familyPermission:true},{new:true},function(err,don){
       if(err){
         res.status(500).json(err);
       }

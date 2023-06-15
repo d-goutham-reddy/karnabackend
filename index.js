@@ -12,7 +12,7 @@ const app=express();
 app.use(express.json())
 dotenv.config();
 
-app.use(cors({ origin: 'http://localhost:5000',method: ['GET','POST','PUT','DELETE'] }));
+app.use(cors({ origin: '*',method: ['GET','POST','PUT','DELETE'] }));
 
 mongoose
   .set('strictQuery', true)

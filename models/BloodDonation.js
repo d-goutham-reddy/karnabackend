@@ -66,6 +66,10 @@ const BloodDonationSchema = mongoose.Schema({
         type:String
     },
 
+    RFID:{
+        type:String
+    },
+
     donorDetails: { type: Schema.Types.ObjectId, ref: Donor },
 
     bloodbankDetails: { type: Schema.Types.ObjectId, ref: BloodBank }

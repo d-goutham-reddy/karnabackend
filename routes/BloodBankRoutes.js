@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const BloodRequest = require("../models/BloodRequest");
 const Donor = require("../models/Donor");
 const BloodPacket = require("../models/BloodPacket");
+const RFID = require("../models/RFID");
 
 //-------------------------------------------------------------------------------------------------------
 //                                        Registration of Blood Bank
@@ -295,7 +296,32 @@ router.put("/appointments/upcoming/complete/:blooddonationid",async(req,res)=>{
 // Complete -> Details About To Be Written Are -> Insert Data
 router.get("/appointments/upcoming/complete/insertdata/:blooddonationid",async(req,res)=>{
   try{
-    res.status(200).json("Success")
+    RFID.find().count(function(err,count){
+      if(err){
+        res.status(500).json(err);
+      }
+      if(count==0){
+        res.status(201).json("Not Yet Found");
+      }
+      else{
+        RFID.find({},function(err,r){
+          if(err){
+            res.status(501).json(err);
+          }
+          BloodDonation.findByIdAndUpdate(req.params.blooddonationid,{RFID:r[0].RFID},{new:true},function(err,bb){
+            if(err){
+              res.status(502).json(err);
+            }
+            RFID.deleteMany({},function(err,rr){
+              if(err){
+                res.status(503).json(err);
+              }
+              res.status(200).json(bb);
+            })
+          })
+        });
+      }
+    })
   }
   catch(err){
     res.status(500).json(err);
@@ -359,15 +385,46 @@ router.get("/appointments/cancelled/:bloodbankid",async(req,res)=>{
 //                                        Stock Management
 
 // Arrival Of New Packet -> RFID Tag Near Reader -> Details Of Packet
-router.get("/stock/new/details/:bloodonationid",async(req,res)=>{
+router.get("/stock/new/details",async(req,res)=>{
   try{
-    BloodDonation.findById(req.params.bloodonationid,function(err,bd){
+    RFID.find().count(function(err,count){
       if(err){
-        res.status(501).json(err);
+        res.status(500).json(err);
       }
-      res.status(200).json(bd);
-    }).populate('donorDetails')
-    // .populate('bloodbankDetails')
+      if(count==0){
+        res.status(201).json("Not Yet Found");
+      }
+      else{
+        RFID.find({},function(err,r){
+          if(err){
+            res.status(501).json(err);
+          }
+          BloodDonation.findOneAndUpdate({RFID:r[0].RFID},{RFID:"i am not gay okay!"},{new:true},function(err,bd){
+            if(err){
+              res.status(502).json(err);
+            }
+            if(bd){
+              RFID.deleteMany({},function(err,rr){
+                if(err){
+                  res.status(503).json(err);
+                }
+                res.status(200).json(bd);
+              })
+            }
+            else{
+              res.status(201).json("Blood Donation Not Found")
+            }
+          }).populate('donorDetails')
+        });
+      }
+    })
+    // BloodDonation.findById(req.params.bloodonationid,function(err,bd){
+    //   if(err){
+    //     res.status(501).json(err);
+    //   }
+    //   res.status(200).json(bd);
+    // }).populate('donorDetails')
+    // // .populate('bloodbankDetails')
   }
   catch(err){
     res.status(500).json(err);
@@ -600,7 +657,33 @@ router.put("/stock/new/create/:blooddonationid",async(req,res)=>{
 // Complete -> Details About To Be Written Are -> Insert Data
 router.get("/stock/new/create/insertdata/:bloodpacketid",async(req,res)=>{
   try{
-    res.status(200).json("Success")
+    RFID.find().count(function(err,count){
+      if(err){
+        res.status(500).json(err);
+      }
+      if(count==0){
+        res.status(201).json("Not Yet Found");
+      }
+      else{
+        RFID.find({},function(err,r){
+          if(err){
+            res.status(501).json(err);
+          }
+          BloodPacket.findByIdAndUpdate(req.params.bloodpacketid,{RFID:r[0].RFID},{new:true},function(err,bp){
+            if(err){
+              res.status(502).json(err);
+            }
+            RFID.deleteMany({},function(err,rr){
+              if(err){
+                res.status(503).json(err);
+              }
+              res.status(200).json(bp);
+            })
+          })
+        });
+      }
+    })
+    // res.status(200).json("Success")
   }
   catch(err){
     res.status(500).json(err);
@@ -646,7 +729,47 @@ router.get("/requests/waiting",async(req,res)=>{
   }
 })
 
-// Waiting Requests -> Provide -> Put RFID Tag Near Reader
+// Waiting Requests -> Provide -> Put RFID Tag Near Reader -> Read Data
+router.get("/requests/waiting/provide/details",async(req,res)=>{
+  try{
+    RFID.find().count(function(err,count){
+      if(err){
+        res.status(500).json(err);
+      }
+      if(count==0){
+        res.status(201).json("Not Yet Found");
+      }
+      else{
+        RFID.find({},function(err,r){
+          if(err){
+            res.status(501).json(err);
+          }
+          BloodPacket.findOne({RFID:r[0].RFID},function(err,bp){
+            if(err){
+              res.status(502).json(err);
+            }
+            if(bp){
+              RFID.deleteMany({},function(err,rr){
+                if(err){
+                  res.status(503).json(err);
+                }
+                res.status(200).json(bp);
+              })
+            }
+            else{
+              res.status(201).json("Blood Packet Not Found")
+            }
+          })
+        });
+      }
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+// Waiting Requests -> Provide -> Put RFID Tag Near Reader -> Provide
 router.put("/requests/waiting/provide/:requestid/:bloodpacketid",async(req,res)=>{
   try{
     BloodPacket.findById(req.params.bloodpacketid,function(err,bp){
@@ -666,7 +789,7 @@ router.put("/requests/waiting/provide/:requestid/:bloodpacketid",async(req,res)=
                     if(err){
                       res.status(503).json(err);
                     }
-                    BloodPacket.findByIdAndUpdate(req.params.bloodpacketid,{bloodRequestDetails:req.params.requestid,availablestatus:false},{new:true},function(err,newbp){
+                    BloodPacket.findByIdAndUpdate(req.params.bloodpacketid,{bloodRequestDetails:req.params.requestid,availablestatus:false,RFID:"i am not gay okay!"},{new:true},function(err,newbp){
                       if(err){
                         res.status(504).json(err);
                       }
@@ -778,6 +901,35 @@ router.get("/requests/delivered/:bloodbankid",async(req,res)=>{
       path : 'bloodRequestDetails',
       populate: {
         path: 'hospitalDetails'
+      }
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+//-------------------------------------------------------------------------------------------------------
+// Get ID Of RFID Tag
+router.post("/rfid/:RFID",async(req,res)=>{
+  try{
+    RFID.find().count(function(err,r){
+      if(err){
+        res.status(500).json(err);
+      }
+      if(r==0){
+        const newRFID = new RFID({
+          RFID:req.params.RFID
+        });
+        newRFID.save(function(err,nr){
+          if(err){
+            res.status(501).json(err);
+          }
+          res.status(200).json(nr);
+        });
+      }
+      else{
+        res.status(201).json("Already Added")
       }
     })
   }

@@ -925,6 +925,7 @@ router.post("/rfid/:RFID",async(req,res)=>{
           if(err){
             res.status(501).json(err);
           }
+          console.log(nr);
           res.status(200).json(nr);
         });
       }

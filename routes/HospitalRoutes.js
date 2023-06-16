@@ -7,6 +7,7 @@ const BloodDonation = require("../models/BloodDonation");
 const Donor = require("../models/Donor");
 const BloodBank = require("../models/BloodBank");
 const OrganRequest = require("../models/OrganRequest");
+const Geolocator = require("../models/Geolocator");
 
 //------------------------------------------------------------------------------------------------------
 //                                           Registration of Hospital
@@ -1242,7 +1243,41 @@ router.get("/transplantations/:hospitalid",async(req,res)=>{
       if(err){
         res.status(501).json(err);
       }
-      res.status(200).json(org);
+      Geolocator.find().count(function(err,gl){
+        if(err){
+          res.status(500).json(err);
+        }
+        if(gl==1){
+          Geolocator.findOne({},function(err,g){
+            if(err){
+              res.status(500).json(err);
+            }
+            var listorg=[]
+            let count=0;
+            for(i of org){
+              count+=1;
+              OrganRequest.findByIdAndUpdate(i._id,{lat:g.lat,long:g.long,position:g.position,speed:g.speed},{new:true},function(err,neworg){
+                if(err){
+                  res.status(500).json(err)
+                }
+                listorg.push(neworg)
+              }).populate('fromHospital').populate('toHospital').populate('donorDetails')
+            }
+            if(count==org.length){
+              Geolocator.deleteMany({},function(err,geo){
+                if(err){
+                  res.status(500).json(err);
+                }
+                res.status(200).json(listorg)
+              })
+            }
+          })
+        }
+        else{
+          res.status(200).json(org);
+        }
+      })
+      // res.status(200).json(org);
     }).populate('fromHospital').populate('toHospital').populate('donorDetails')
   }
   catch(err){
@@ -1287,6 +1322,39 @@ router.get("/emergencyservice",async(req,res)=>{
         }
       }
       res.status(200).json(list);
+    })
+  }
+  catch(err){
+    res.status(500).json(err);
+  }
+})
+
+//------------------------------------------------------------------------------------------------------
+//                                          GeoLocator
+
+router.post("/geolocator",async(req,res)=>{
+  try{
+    Geolocator.find().count(function(err,g){
+      if(err){
+        res.status(500).json(err);
+      }
+      if(g==0){
+        const newGeolocator = new Geolocator({
+          lat:req.body.lat,
+          long:req.body.long,
+          position:req.body.position,
+          speed:req.body.speed
+        });
+        newGeolocator.save(function(err,ng){
+          if(err){
+            res.status(501).json(err);
+          }
+          res.status(200).json(ng);
+        });
+      }
+      else{
+        res.status(201).json("Already Added")
+      }
     })
   }
   catch(err){

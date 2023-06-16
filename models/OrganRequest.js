@@ -125,6 +125,22 @@ const OrganRequestSchema = mongoose.Schema({
         required:true
     },
 
+    lat: {
+        type: String
+    },
+    
+    long: {
+        type: String
+    },
+    
+    position: {
+        type: String
+    },
+    
+    speed: {
+        type: String
+    },
+
     donorDetails:{ type: Schema.Types.ObjectId, ref: Donor },
 
     fromHospital:{ type: Schema.Types.ObjectId, ref: Hospital },

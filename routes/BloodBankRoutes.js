@@ -691,7 +691,7 @@ router.get("/stock/new/create/insertdata/:bloodpacketid",async(req,res)=>{
 })
 
 // Available Packets -> Whole or RBC or Platelet or Plasma
-router.get("/stock/available/:bloodbankid",async(req,res)=>{
+router.post("/stock/available/:bloodbankid",async(req,res)=>{
   try{
     BloodPacket.find({separationType:req.body.packettype,availablestatus:true}).populate('bloodDonationDetails').exec((err,bp)=>{
       if(err){
@@ -729,8 +729,48 @@ router.get("/requests/waiting",async(req,res)=>{
   }
 })
 
-// Waiting Requests -> Provide -> Put RFID Tag Near Reader -> Read Data
-router.get("/requests/waiting/provide/details",async(req,res)=>{
+// // Waiting Requests -> Provide -> Put RFID Tag Near Reader -> Read Data
+// router.get("/requests/waiting/provide/details",async(req,res)=>{
+//   try{
+//     RFID.find().count(function(err,count){
+//       if(err){
+//         res.status(500).json(err);
+//       }
+//       if(count==0){
+//         res.status(201).json("Not Yet Found");
+//       }
+//       else{
+//         RFID.find({},function(err,r){
+//           if(err){
+//             res.status(501).json(err);
+//           }
+//           BloodPacket.findOne({RFID:r[0].RFID},function(err,bp){
+//             if(err){
+//               res.status(502).json(err);
+//             }
+//             if(bp){
+//               RFID.deleteMany({},function(err,rr){
+//                 if(err){
+//                   res.status(503).json(err);
+//                 }
+//                 res.status(200).json(bp);
+//               })
+//             }
+//             else{
+//               res.status(201).json("Blood Packet Not Found")
+//             }
+//           })
+//         });
+//       }
+//     })
+//   }
+//   catch(err){
+//     res.status(500).json(err);
+//   }
+// })
+
+// Waiting Requests -> Provide -> Put RFID Tag Near Reader -> Provide
+router.put("/requests/waiting/provide/details/:requestid",async(req,res)=>{
   try{
     RFID.find().count(function(err,count){
       if(err){
@@ -753,12 +793,71 @@ router.get("/requests/waiting/provide/details",async(req,res)=>{
                 if(err){
                   res.status(503).json(err);
                 }
-                res.status(200).json(bp);
+                  BloodRequest.findById(req.params.requestid,function(err,br){
+                    if(err){
+                      res.status(502).json(err);
+                    }
+                    if(br.status=="Waiting"){
+                      if(bp.availablestatus){
+                        if(bp.separationType==br.component){
+                          if(bp.bloodDonationDetails.bloodgroup==br.bloodgroup){
+                            if(new Date()<bp.expiryDate){
+                              BloodRequest.findByIdAndUpdate(req.params.requestid,{status:"Confirmed"},{new:true},function(err,newbr){
+                                if(err){
+                                  res.status(503).json(err);
+                                }
+                                BloodPacket.findByIdAndUpdate(bp._id,{bloodRequestDetails:req.params.requestid,availablestatus:false},{new:true},function(err,newbp){
+                                  if(err){
+                                    res.status(504).json(err);
+                                  }
+                                  res.status(200).json(newbp);
+                                }).populate({
+                                  path : 'bloodDonationDetails',
+                                  populate: [{
+                                    path: 'donorDetails'
+                                  },{
+                                    path: 'bloodbankDetails'
+                                  }]
+                                }).populate({
+                                  path : 'bloodRequestDetails',
+                                  populate: {
+                                    path: 'hospitalDetails'
+                                  }
+                                })
+                              })
+                            }
+                            else{
+                              res.status(400).json("The Blood Packet Scanned Has Expired And Hence Cannot Be Sent To The Hospital. Please Dispose It")
+                            }
+                          }
+                          else{
+                            res.status(400).json("The Blood Type Requested Does Not Match The Blood Type Present In The Blood Packet");
+                          }
+                        }
+                        else{
+                          res.status(400).json("The Component Type Requested Does Not Match The Component Type Present In The Blood Packet");
+                        }
+                      }
+                      else{
+                        res.status(400).json("The Requested Blood Packet Is Not Available As It Already Is Booked");
+                      }
+                    }
+                    else{
+                      res.status(400).json("The Hospital Request Does Not Have Its Status As Waiting. Please Check.")
+                    }
+                  })
               })
             }
             else{
-              res.status(201).json("Blood Packet Not Found")
+              res.status(400).json("Blood Packet Not Found")
             }
+          }).populate({
+            path : 'bloodDonationDetails',
+            populate: [{
+              path: 'donorDetails'
+            },{
+              path: 'bloodbankDetails'
+            }]
           })
         });
       }
@@ -769,79 +868,79 @@ router.get("/requests/waiting/provide/details",async(req,res)=>{
   }
 })
 
-// Waiting Requests -> Provide -> Put RFID Tag Near Reader -> Provide
-router.put("/requests/waiting/provide/:requestid/:bloodpacketid",async(req,res)=>{
-  try{
-    BloodPacket.findById(req.params.bloodpacketid,function(err,bp){
-      if(err){
-        res.status(501).json(err);
-      }
-      BloodRequest.findById(req.params.requestid,function(err,br){
-        if(err){
-          res.status(502).json(err);
-        }
-        if(br.status=="Waiting"){
-          if(bp.availablestatus){
-            if(bp.separationType==br.component){
-              if(bp.bloodDonationDetails.bloodgroup==br.bloodgroup){
-                if(new Date()<bp.expiryDate){
-                  BloodRequest.findByIdAndUpdate(req.params.requestid,{status:"Confirmed"},{new:true},function(err,newbr){
-                    if(err){
-                      res.status(503).json(err);
-                    }
-                    BloodPacket.findByIdAndUpdate(req.params.bloodpacketid,{bloodRequestDetails:req.params.requestid,availablestatus:false,RFID:"i am not gay okay!"},{new:true},function(err,newbp){
-                      if(err){
-                        res.status(504).json(err);
-                      }
-                      res.status(200).json(newbp);
-                    }).populate({
-                      path : 'bloodDonationDetails',
-                      populate: [{
-                        path: 'donorDetails'
-                      },{
-                        path: 'bloodbankDetails'
-                      }]
-                    }).populate({
-                      path : 'bloodRequestDetails',
-                      populate: {
-                        path: 'hospitalDetails'
-                      }
-                    })
-                  })
-                }
-                else{
-                  res.status(400).json("The Blood Packet Scanned Has Expired And Hence Cannot Be Sent To The Hospital. Please Dispose It")
-                }
-              }
-              else{
-                res.status(400).json("The Blood Type Requested Does Not Match The Blood Type Present In The Blood Packet");
-              }
-            }
-            else{
-              res.status(400).json("The Component Type Requested Does Not Match The Component Type Present In The Blood Packet");
-            }
-          }
-          else{
-            res.status(400).json("The Requested Blood Packet Is Not Available As It Already Is Booked");
-          }
-        }
-        else{
-          res.status(400).json("The Hospital Request Does Not Have Its Status As Waiting. Please Check.")
-        }
-      })
-    }).populate({
-      path : 'bloodDonationDetails',
-      populate: [{
-        path: 'donorDetails'
-      },{
-        path: 'bloodbankDetails'
-      }]
-    })
-  }
-  catch(err){
-    res.status(500).json(err);
-  }
-})
+// // Waiting Requests -> Provide -> Put RFID Tag Near Reader -> Provide
+// router.put("/requests/waiting/provide/:requestid/:bloodpacketid",async(req,res)=>{
+//   try{
+//     BloodPacket.findById(req.params.bloodpacketid,function(err,bp){
+//       if(err){
+//         res.status(501).json(err);
+//       }
+//       BloodRequest.findById(req.params.requestid,function(err,br){
+//         if(err){
+//           res.status(502).json(err);
+//         }
+//         if(br.status=="Waiting"){
+//           if(bp.availablestatus){
+//             if(bp.separationType==br.component){
+//               if(bp.bloodDonationDetails.bloodgroup==br.bloodgroup){
+//                 if(new Date()<bp.expiryDate){
+//                   BloodRequest.findByIdAndUpdate(req.params.requestid,{status:"Confirmed"},{new:true},function(err,newbr){
+//                     if(err){
+//                       res.status(503).json(err);
+//                     }
+//                     BloodPacket.findByIdAndUpdate(req.params.bloodpacketid,{bloodRequestDetails:req.params.requestid,availablestatus:false},{new:true},function(err,newbp){
+//                       if(err){
+//                         res.status(504).json(err);
+//                       }
+//                       res.status(200).json(newbp);
+//                     }).populate({
+//                       path : 'bloodDonationDetails',
+//                       populate: [{
+//                         path: 'donorDetails'
+//                       },{
+//                         path: 'bloodbankDetails'
+//                       }]
+//                     }).populate({
+//                       path : 'bloodRequestDetails',
+//                       populate: {
+//                         path: 'hospitalDetails'
+//                       }
+//                     })
+//                   })
+//                 }
+//                 else{
+//                   res.status(400).json("The Blood Packet Scanned Has Expired And Hence Cannot Be Sent To The Hospital. Please Dispose It")
+//                 }
+//               }
+//               else{
+//                 res.status(400).json("The Blood Type Requested Does Not Match The Blood Type Present In The Blood Packet");
+//               }
+//             }
+//             else{
+//               res.status(400).json("The Component Type Requested Does Not Match The Component Type Present In The Blood Packet");
+//             }
+//           }
+//           else{
+//             res.status(400).json("The Requested Blood Packet Is Not Available As It Already Is Booked");
+//           }
+//         }
+//         else{
+//           res.status(400).json("The Hospital Request Does Not Have Its Status As Waiting. Please Check.")
+//         }
+//       })
+//     }).populate({
+//       path : 'bloodDonationDetails',
+//       populate: [{
+//         path: 'donorDetails'
+//       },{
+//         path: 'bloodbankDetails'
+//       }]
+//     })
+//   }
+//   catch(err){
+//     res.status(500).json(err);
+//   }
+// })
 
 // Confirmed Requests
 router.get("/requests/confirmed/:bloodbankid",async(req,res)=>{
@@ -925,7 +1024,6 @@ router.post("/rfid/:RFID",async(req,res)=>{
           if(err){
             res.status(501).json(err);
           }
-          console.log(nr);
           res.status(200).json(nr);
         });
       }

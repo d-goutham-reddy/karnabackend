@@ -8,6 +8,7 @@ const Donor = require("../models/Donor");
 const BloodBank = require("../models/BloodBank");
 const OrganRequest = require("../models/OrganRequest");
 const Geolocator = require("../models/Geolocator");
+const RFID = require("../models/RFID");
 
 //------------------------------------------------------------------------------------------------------
 //                                           Registration of Hospital
@@ -478,38 +479,103 @@ router.get("/requests/confirmed/:hospitalid",async(req,res)=>{
   }
 })
 
+// // Confirmed Request -> Arrived
+// router.put("/requests/confirmed/arrived/:bloodrequestid/:bloodpacketid",async(req,res)=>{
+//   try{
+//     BloodPacket.findById(req.params.bloodpacketid,function(err,bp){
+//       if(err){
+//         res.status(501).json(err);
+//       }
+//       if(bp.bloodRequestDetails==req.params.bloodrequestid){
+//         BloodRequest.findByIdAndUpdate(req.params.bloodrequestid,{status:"Delivered"},{new:true},function(err,br){
+//           if(err){
+//             res.status(502).json(err);
+//           }
+//           BloodPacket.findById(req.params.bloodpacketid,function(err,newbp){
+//             if(err){
+//               res.status(503).json(err);
+//             }
+//             res.status(200).json(newbp);
+//           }).populate({
+//             path : 'bloodDonationDetails',
+//             populate: [{
+//               path: 'bloodbankDetails'
+//             }]
+//           }).populate({
+//             path : 'bloodRequestDetails',
+//             populate: {
+//               path: 'hospitalDetails'
+//             }
+//           })
+//         })
+//       }
+//       else{
+//         res.status(400).json("The Blood Packet You Have Received Does Not Belong To The Specific Request");
+//       }
+//     })
+//   }
+//   catch(err){
+//     res.status(500).json(err);
+//   }
+// })
+
 // Confirmed Request -> Arrived
-router.put("/requests/confirmed/arrived/:bloodrequestid/:bloodpacketid",async(req,res)=>{
+router.put("/requests/confirmed/arrived/:bloodrequestid",async(req,res)=>{
   try{
-    BloodPacket.findById(req.params.bloodpacketid,function(err,bp){
+    RFID.find().count(function(err,count){
       if(err){
-        res.status(501).json(err);
+        res.status(500).json(err);
       }
-      if(bp.bloodRequestDetails==req.params.bloodrequestid){
-        BloodRequest.findByIdAndUpdate(req.params.bloodrequestid,{status:"Delivered"},{new:true},function(err,br){
-          if(err){
-            res.status(502).json(err);
-          }
-          BloodPacket.findById(req.params.bloodpacketid,function(err,newbp){
-            if(err){
-              res.status(503).json(err);
-            }
-            res.status(200).json(newbp);
-          }).populate({
-            path : 'bloodDonationDetails',
-            populate: [{
-              path: 'bloodbankDetails'
-            }]
-          }).populate({
-            path : 'bloodRequestDetails',
-            populate: {
-              path: 'hospitalDetails'
-            }
-          })
-        })
+      if(count==0){
+        res.status(201).json("Not Yet Found");
       }
       else{
-        res.status(400).json("The Blood Packet You Have Received Does Not Belong To The Specific Request");
+        RFID.find({},function(err,r){
+          if(err){
+            res.status(501).json(err);
+          }
+          BloodPacket.findOne({RFID:r[0].RFID},function(err,bp){
+            if(err){
+              res.status(502).json(err);
+            }
+            if(bp){
+              RFID.deleteMany({},function(err,rr){
+                if(err){
+                  res.status(503).json(err);
+                }
+                if(bp.bloodRequestDetails==req.params.bloodrequestid){
+                  BloodRequest.findByIdAndUpdate(req.params.bloodrequestid,{status:"Delivered"},{new:true},function(err,br){
+                    if(err){
+                      res.status(502).json(err);
+                    }
+                    BloodPacket.findByIdAndUpdate(bp._id,{RFID:"i am not gay okay!"},{new:true},function(err,newbp){
+                      if(err){
+                        res.status(503).json(err);
+                      }
+                      res.status(200).json(newbp);
+                    }).populate({
+                      path : 'bloodDonationDetails',
+                      populate: [{
+                        path: 'bloodbankDetails'
+                      }]
+                    }).populate({
+                      path : 'bloodRequestDetails',
+                      populate: {
+                        path: 'hospitalDetails'
+                      }
+                    })
+                  })
+                }
+                else{
+                  res.status(400).json("The Blood Packet You Have Received Does Not Belong To The Specific Request");
+                }
+              })
+            }
+            else{
+              res.status(400).json("Blood Packet Not Found")
+            }
+          })
+        });
       }
     })
   }

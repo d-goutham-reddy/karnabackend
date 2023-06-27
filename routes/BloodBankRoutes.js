@@ -1010,7 +1010,7 @@ router.get("/requests/delivered/:bloodbankid",async(req,res)=>{
 
 //-------------------------------------------------------------------------------------------------------
 // Get ID Of RFID Tag
-router.post("/rfid/:RFID",async(req,res)=>{
+router.get("/rfid/:RFID",async(req,res)=>{
   try{
     RFID.find().count(function(err,r){
       if(err){

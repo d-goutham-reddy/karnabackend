@@ -19,7 +19,7 @@
     "nodemon": "^2.0.22",
     "scikit-learn": "^0.1.0"
   },
-  "engines":{
-    "node":"18.x"
+  "engines": {
+    "node": "16.18.0.x"
   }
 }

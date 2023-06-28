@@ -1408,7 +1408,6 @@ router.post("/geolocator",async(req,res)=>{
         const newGeolocator = new Geolocator({
           lat:req.body.lat,
           long:req.body.long,
-          position:req.body.position,
           speed:req.body.speed
         });
         newGeolocator.save(function(err,ng){

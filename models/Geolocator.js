@@ -13,12 +13,6 @@ const GeolocatorSchema =mongoose.Schema({
     unique : true
   },
 
-  position: {
-    type: String,
-    required: true,
-    unique : true
-  },
-
   speed: {
     type: String,
     required: true,

@@ -17,12 +17,6 @@ const GeolocatorSchema =mongoose.Schema({
     type: String,
     required: true,
     unique : true
-  },
-  
-  alt:{
-    type: String,
-    required: true,
-    unique : true
   }
 
 },

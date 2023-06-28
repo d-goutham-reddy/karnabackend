@@ -1322,7 +1322,7 @@ router.get("/transplantations/:hospitalid",async(req,res)=>{
             let count=0;
             for(i of org){
               count+=1;
-              OrganRequest.findByIdAndUpdate(i._id,{lat:g.lat,long:g.long,speed:g.speed,alt:g.alt},{new:true},function(err,neworg){
+              OrganRequest.findByIdAndUpdate(i._id,{lat:g.lat,long:g.long,speed:g.speed},{new:true},function(err,neworg){
                 if(err){
                   res.status(500).json(err)
                 }
@@ -1408,8 +1408,7 @@ router.post("/geolocator",async(req,res)=>{
         const newGeolocator = new Geolocator({
           lat:req.body.lat,
           long:req.body.long,
-          speed:req.body.speed,
-          alt:req.body.alt
+          speed:req.body.speed
         });
         newGeolocator.save(function(err,ng){
           if(err){

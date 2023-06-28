@@ -1408,7 +1408,8 @@ router.post("/geolocator",async(req,res)=>{
         const newGeolocator = new Geolocator({
           lat:req.body.lat,
           long:req.body.long,
-          speed:req.body.speed
+          speed:req.body.speed,
+          alt:req.body.alt
         });
         newGeolocator.save(function(err,ng){
           if(err){
@@ -1418,7 +1419,18 @@ router.post("/geolocator",async(req,res)=>{
         });
       }
       else{
-        res.status(201).json("Already Added")
+        // Geolocator.find({},function(err,geol){
+        //   if(err){
+        //     res.status(502).json(err)
+        //   }
+        //   Geolocator.findByIdAndUpdate(geol[0]._id,{})
+        // })
+        Geolocator.findOneAndUpdate({},{lat:req.body.lat,long:req.body.long,speed:req.body.speed,alt:req.body.alt},{new:true},function(err,geo){
+          if(err){
+            res.status(502).json(err);
+          }
+          res.status(200).json(geo)
+        })        
       }
     })
   }

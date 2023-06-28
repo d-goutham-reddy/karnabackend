@@ -133,11 +133,11 @@ const OrganRequestSchema = mongoose.Schema({
         type: String
     },
     
-    position: {
+    speed: {
         type: String
     },
     
-    speed: {
+    alt: {
         type: String
     },
 

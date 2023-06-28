@@ -1322,7 +1322,7 @@ router.get("/transplantations/:hospitalid",async(req,res)=>{
             let count=0;
             for(i of org){
               count+=1;
-              OrganRequest.findByIdAndUpdate(i._id,{lat:g.lat,long:g.long,position:g.position,speed:g.speed},{new:true},function(err,neworg){
+              OrganRequest.findByIdAndUpdate(i._id,{lat:g.lat,long:g.long,speed:g.speed,alt:g.alt},{new:true},function(err,neworg){
                 if(err){
                   res.status(500).json(err)
                 }
@@ -1330,12 +1330,12 @@ router.get("/transplantations/:hospitalid",async(req,res)=>{
               }).populate('fromHospital').populate('toHospital').populate('donorDetails')
             }
             if(count==org.length){
-              Geolocator.deleteMany({},function(err,geo){
-                if(err){
-                  res.status(500).json(err);
-                }
+              // Geolocator.deleteMany({},function(err,geo){
+              //   if(err){
+              //     res.status(500).json(err);
+              //   }
                 res.status(200).json(listorg)
-              })
+              // })
             }
           })
         }

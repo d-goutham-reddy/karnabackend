@@ -1406,9 +1406,9 @@ router.post("/geolocator",async(req,res)=>{
       }
       if(g==0){
         const newGeolocator = new Geolocator({
-          lat:req.body.lat,
-          long:req.body.long,
-          speed:req.body.speed
+          lat:"13.007517",
+          long:"77.491970",
+          speed:"0"
         });
         newGeolocator.save(function(err,ng){
           if(err){

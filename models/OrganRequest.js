@@ -136,10 +136,6 @@ const OrganRequestSchema = mongoose.Schema({
     speed: {
         type: String
     },
-    
-    alt: {
-        type: String
-    },
 
     donorDetails:{ type: Schema.Types.ObjectId, ref: Donor },
 

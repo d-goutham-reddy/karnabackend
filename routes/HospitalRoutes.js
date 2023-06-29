@@ -1305,46 +1305,38 @@ router.put("/donorregistry/confirm/yes/submit/confirm/:donorid/:organrequestid/:
 
 router.get("/transplantations/:hospitalid",async(req,res)=>{
   try{
-    OrganRequest.find({status:"Booked",$or: [{fromHospital:req.params.hospitalid}, {toHospital:req.params.hospitalid}]},function(err,org){
+    let count=0
+    OrganRequest.find({status:"Booked",$or: [{fromHospital:req.params.hospitalid},{toHospital:req.params.hospitalid}]},function(err,org){
       if(err){
-        res.status(501).json(err);
+        res.status(500).json(err)
       }
       Geolocator.find().count(function(err,gl){
         if(err){
-          res.status(500).json(err);
+          res.status(501).json(err)
         }
         if(gl==1){
           Geolocator.findOne({},function(err,g){
             if(err){
-              res.status(500).json(err);
+              res.status(502).json(err);
             }
+            
             var listorg=[]
-            let count=0;
-            for(i of org){
-              count+=1;
-              OrganRequest.findByIdAndUpdate(i._id,{lat:g.lat,long:g.long,speed:g.speed},{new:true},function(err,neworg){
+            for(i in org){
+              OrganRequest.findByIdAndUpdate(org[i]._id,{lat:g.lat,long:g.long,speed:g.speed},{new:true},function(err,norg){
                 if(err){
-                  res.status(500).json(err)
+                  res.status(503).json(err);
                 }
-                listorg.push(neworg)
+                count+=1
+                listorg.push(norg)
+                if(count==org.length){
+                  res.status(200).json(listorg)
+                }
               }).populate('fromHospital').populate('toHospital').populate('donorDetails')
-            }
-            if(count==org.length){
-              // Geolocator.deleteMany({},function(err,geo){
-              //   if(err){
-              //     res.status(500).json(err);
-              //   }
-                res.status(200).json(listorg)
-              // })
             }
           })
         }
-        else{
-          res.status(200).json(org);
-        }
       })
-      // res.status(200).json(org);
-    }).populate('fromHospital').populate('toHospital').populate('donorDetails')
+    })
   }
   catch(err){
     res.status(500).json(err);

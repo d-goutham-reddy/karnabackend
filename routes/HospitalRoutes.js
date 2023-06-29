@@ -1391,6 +1391,7 @@ router.get("/emergencyservice",async(req,res)=>{
 //                                          GeoLocator
 
 router.post("/geolocator",async(req,res)=>{
+  console.log(req.body);
   try{
     Geolocator.find().count(function(err,g){
       if(err){

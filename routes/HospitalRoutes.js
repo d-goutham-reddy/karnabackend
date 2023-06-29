@@ -1416,7 +1416,7 @@ router.post("/geolocator",async(req,res)=>{
         //   }
         //   Geolocator.findByIdAndUpdate(geol[0]._id,{})
         // })
-        Geolocator.findOneAndUpdate({},{lat:req.body.lat,long:req.body.long,speed:req.body.speed},{new:true},function(err,geo){
+        Geolocator.findOneAndUpdate({},{lat:req.body.lat,long:req.body.long,speed:req.body.sp},{new:true},function(err,geo){
           if(err){
             res.status(502).json(err);
           }

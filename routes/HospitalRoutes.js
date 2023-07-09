@@ -1390,46 +1390,53 @@ router.get("/emergencyservice",async(req,res)=>{
 //------------------------------------------------------------------------------------------------------
 //                                          GeoLocator
 
-router.post("/geolocator",async(req,res)=>{
-  console.log(req.body);
-  try{
-    Geolocator.find().count(function(err,g){
-      if(err){
+router.get("/geolocator/:latitude/:longitude/:alt/:spd", async (req, res) => {
+  console.log(req.params);
+  try {
+    Geolocator.find().count(function (err, g) {
+      if (err) {
         res.status(500).json(err);
       }
-      if(g==0){
+      if (g == 0) {
         const newGeolocator = new Geolocator({
-          lat:"13.007517",
-          long:"77.491970",
-          speed:"0"
+          lat: req.params.latitude,
+          long: req.params.longitude,
+          speed: req.params.spd,
         });
-        newGeolocator.save(function(err,ng){
-          if(err){
+        newGeolocator.save(function (err, ng) {
+          if (err) {
             res.status(501).json(err);
           }
           res.status(200).json(ng);
         });
-      }
-      else{
+      } else {
         // Geolocator.find({},function(err,geol){
         //   if(err){
         //     res.status(502).json(err)
         //   }
         //   Geolocator.findByIdAndUpdate(geol[0]._id,{})
         // })
-        Geolocator.findOneAndUpdate({},{lat:req.body.lat,long:req.body.long,speed:req.body.sp},{new:true},function(err,geo){
-          if(err){
-            res.status(502).json(err);
+        Geolocator.findOneAndUpdate(
+          {},
+          {
+            lat: req.params.latitude,
+            long: req.params.longitude,
+            speed: req.params.spd,
+          },
+          { new: true },
+          function (err, geo) {
+            if (err) {
+              res.status(502).json(err);
+            }
+            res.status(200).json(geo);
           }
-          res.status(200).json(geo)
-        })        
+        );
       }
-    })
-  }
-  catch(err){
+    });
+  } catch (err) {
     res.status(500).json(err);
   }
-})
+});
 
 //------------------------------------------------------------------------------------------------------
 module.exports = router;

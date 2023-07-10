@@ -788,11 +788,13 @@ router.put("/requests/waiting/provide/details/:requestid",async(req,res)=>{
             if(err){
               res.status(502).json(err);
             }
+            RFID.deleteMany({},function(err,rr){
+              if(err){
+                res.status(503).json(err);
+              }
+            })
             if(bp){
-              RFID.deleteMany({},function(err,rr){
-                if(err){
-                  res.status(503).json(err);
-                }
+              
                   BloodRequest.findById(req.params.requestid,function(err,br){
                     if(err){
                       res.status(502).json(err);
@@ -846,7 +848,7 @@ router.put("/requests/waiting/provide/details/:requestid",async(req,res)=>{
                       res.status(400).json("The Hospital Request Does Not Have Its Status As Waiting. Please Check.")
                     }
                   })
-              })
+              
             }
             else{
               res.status(400).json("Blood Packet Not Found")

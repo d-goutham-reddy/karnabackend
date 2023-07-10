@@ -792,67 +792,68 @@ router.put("/requests/waiting/provide/details/:requestid",async(req,res)=>{
               if(err){
                 res.status(503).json(err);
               }
-            })
-            if(bp){
+              if(bp){
               
-                  BloodRequest.findById(req.params.requestid,function(err,br){
-                    if(err){
-                      res.status(502).json(err);
-                    }
-                    if(br.status=="Waiting"){
-                      if(bp.availablestatus){
-                        if(bp.separationType==br.component){
-                          if(bp.bloodDonationDetails.bloodgroup==br.bloodgroup){
-                            if(new Date()<bp.expiryDate){
-                              BloodRequest.findByIdAndUpdate(req.params.requestid,{status:"Confirmed"},{new:true},function(err,newbr){
+                BloodRequest.findById(req.params.requestid,function(err,br){
+                  if(err){
+                    res.status(502).json(err);
+                  }
+                  if(br.status=="Waiting"){
+                    if(bp.availablestatus){
+                      if(bp.separationType==br.component){
+                        if(bp.bloodDonationDetails.bloodgroup==br.bloodgroup){
+                          if(new Date()<bp.expiryDate){
+                            BloodRequest.findByIdAndUpdate(req.params.requestid,{status:"Confirmed"},{new:true},function(err,newbr){
+                              if(err){
+                                res.status(503).json(err);
+                              }
+                              BloodPacket.findByIdAndUpdate(bp._id,{bloodRequestDetails:req.params.requestid,availablestatus:false},{new:true},function(err,newbp){
                                 if(err){
-                                  res.status(503).json(err);
+                                  res.status(504).json(err);
                                 }
-                                BloodPacket.findByIdAndUpdate(bp._id,{bloodRequestDetails:req.params.requestid,availablestatus:false},{new:true},function(err,newbp){
-                                  if(err){
-                                    res.status(504).json(err);
-                                  }
-                                  res.status(200).json(newbp);
-                                }).populate({
-                                  path : 'bloodDonationDetails',
-                                  populate: [{
-                                    path: 'donorDetails'
-                                  },{
-                                    path: 'bloodbankDetails'
-                                  }]
-                                }).populate({
-                                  path : 'bloodRequestDetails',
-                                  populate: {
-                                    path: 'hospitalDetails'
-                                  }
-                                })
+                                res.status(200).json(newbp);
+                              }).populate({
+                                path : 'bloodDonationDetails',
+                                populate: [{
+                                  path: 'donorDetails'
+                                },{
+                                  path: 'bloodbankDetails'
+                                }]
+                              }).populate({
+                                path : 'bloodRequestDetails',
+                                populate: {
+                                  path: 'hospitalDetails'
+                                }
                               })
-                            }
-                            else{
-                              res.status(400).json("The Blood Packet Scanned Has Expired And Hence Cannot Be Sent To The Hospital. Please Dispose It")
-                            }
+                            })
                           }
                           else{
-                            res.status(400).json("The Blood Type Requested Does Not Match The Blood Type Present In The Blood Packet");
+                            res.status(400).json("The Blood Packet Scanned Has Expired And Hence Cannot Be Sent To The Hospital. Please Dispose It")
                           }
                         }
                         else{
-                          res.status(400).json("The Component Type Requested Does Not Match The Component Type Present In The Blood Packet");
+                          res.status(400).json("The Blood Type Requested Does Not Match The Blood Type Present In The Blood Packet");
                         }
                       }
                       else{
-                        res.status(400).json("The Requested Blood Packet Is Not Available As It Already Is Booked");
+                        res.status(400).json("The Component Type Requested Does Not Match The Component Type Present In The Blood Packet");
                       }
                     }
                     else{
-                      res.status(400).json("The Hospital Request Does Not Have Its Status As Waiting. Please Check.")
+                      res.status(400).json("The Requested Blood Packet Is Not Available As It Already Is Booked");
                     }
-                  })
-              
-            }
-            else{
-              res.status(400).json("Blood Packet Not Found")
-            }
+                  }
+                  else{
+                    res.status(400).json("The Hospital Request Does Not Have Its Status As Waiting. Please Check.")
+                  }
+                })
+            
+          }
+          else{
+            res.status(400).json("Blood Packet Not Found")
+          }
+            })
+            
           }).populate({
             path : 'bloodDonationDetails',
             populate: [{

@@ -538,11 +538,12 @@ router.put("/requests/confirmed/arrived/:bloodrequestid",async(req,res)=>{
             if(err){
               res.status(502).json(err);
             }
-            if(bp){
-              RFID.deleteMany({},function(err,rr){
-                if(err){
-                  res.status(503).json(err);
-                }
+            RFID.deleteMany({},function(err,rr){
+              if(err){
+                res.status(503).json(err);
+              }
+              if(bp){
+              
                 if(bp.bloodRequestDetails==req.params.bloodrequestid){
                   BloodRequest.findByIdAndUpdate(req.params.bloodrequestid,{status:"Delivered"},{new:true},function(err,br){
                     if(err){
@@ -569,11 +570,13 @@ router.put("/requests/confirmed/arrived/:bloodrequestid",async(req,res)=>{
                 else{
                   res.status(400).json("The Blood Packet You Have Received Does Not Belong To The Specific Request");
                 }
-              })
+              
             }
             else{
               res.status(400).json("Blood Packet Not Found")
             }
+            })
+            
           })
         });
       }
